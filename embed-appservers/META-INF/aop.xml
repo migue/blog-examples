@@ -1,0 +1,6 @@
+<aspectj>
+	<aspects>
+		<aspect
+			name="com.liferay.embed.application.server.tomcat.classloading.ExplodedTomcatStylesResolutor" />
+	</aspects>
+</aspectj>
