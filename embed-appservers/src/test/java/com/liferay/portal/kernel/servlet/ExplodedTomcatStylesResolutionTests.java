@@ -12,14 +12,12 @@ import org.junit.Test;
 public class ExplodedTomcatStylesResolutionTests {
 
 	@Test
-	public void startLiferayApp() {
+	public void testRootDirReplacement() {
 		try {
 			String rootDir = WebDirDetector.getRootDir(null);
-			/*
-			 * Assert.assertEquals(
-			 * "/home/migue/development/workspaces/workspace-liferayportal/Archive/portal/portal-web/docroot/"
-			 * , rootDir);
-			 */
+			Assert.assertEquals(
+					"/home/migue/development/workspaces/workspace-liferayportal/Archive/portal/portal-web/docroot/",
+					rootDir);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected error");
