@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Tomcat;
 
 import com.liferay.embed.application.server.EmbeddableApplicationServer;
@@ -53,11 +54,9 @@ public class ExplodedTomcatServer extends TomcatServer {
 			// configure the context
 			liferayContext.setReloadable(true);
 
-			// TODO configure custom loader: this is for reloading classes in a
-			// custom way
-
-			// TomcatLoader tomcatLoader = new TomcatLoader(classLoader);
-			// liferayContext.setLoader(tomcatLoader);
+			// TODO we could write a custom loader
+			WebappLoader loader = new WebappLoader(classLoader);
+			liferayContext.setLoader(loader);
 
 		} catch (ServletException e) {
 			System.err.println("Include logging:" + e.getStackTrace());
