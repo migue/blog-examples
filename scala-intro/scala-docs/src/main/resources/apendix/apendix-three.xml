@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix xml:id="apendix-producers" xreflabel="Código fuente producers" version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title><emphasis role="italic">Producers</emphasis></title>
+	<para>El siguiente código fuente contiene la definición del interfaz <emphasis role="italic"
+		>producer</emphasis> analizado en <xref linkend="producers-example"/> </para>
+	<section>
+		<title>Código fuente completo</title>
+		<para>
+			<programlisting>package com.blogspot.miguelinlas3.phd.paragprog.actors
+
+import scala.actors.Actor
+import scala.actors.Actor._
+
+abstract class Producer[T] {
+
+  /** Mensaje indicando que el siguiente valor debe de computarse. */
+  private val Next = new Object 
+
+  /** Estado indefinido del iterator. */
+  private val Undefined = new Object
+
+  /** Mensaje para detener al coordinador. */
+  private val Stop = new Object 
+
+  protected def produce(x: T) {
+    coordinator ! Some(x)
+    receive { case Next => }
+  }
+
+  protected def produceValues: Unit
+
+  def iterator = new Iterator[T] {
+    private var current: Any = Undefined
+    private def lookAhead = {
+      if (current == Undefined) current = coordinator !? Next
+      current
+    }
+
+    def hasNext: Boolean = lookAhead match {
+      case Some(x) => true
+      case None => { coordinator ! Stop; false }
+    }
+
+    def next: T = lookAhead match {
+      case Some(x) => current = Undefined; x.asInstanceOf[T]
+    }
+  }
+
+  private val coordinator: Actor = actor {
+    loop {
+      react {
+        case Next =>
+          producer ! Next
+          reply {
+            receive { case x: Option[_] => x }
+          }
+        case Stop =>
+          exit('stop)
+      }
+    }
+  }
+
+  private val producer: Actor = actor {
+    receive { 
+      case Next => 
+        produceValues
+        coordinator ! None 
+    }
+  }
+}
+
+object producers extends Application {
+
+  class Tree(val left: Tree, val elem: Int, val right: Tree)
+  def node(left: Tree, elem: Int, right: Tree): Tree = 
+		new Tree(left, elem, right)
+  def node(elem: Int): Tree = node(null, elem, null)
+
+  def tree = 
+	node(node(node(3), 4, node(6)), 8, node(node(9), 10, node(11)))
+
+  class PreOrder(n: Tree) extends Producer[Int] {
+    def produceValues = traverse(n) 
+    def traverse(n: Tree) {
+      if (n != null) {
+        produce(n.elem)
+        traverse(n.left)
+        traverse(n.right)
+      }
+    }
+  }
+
+  class PostOrder(n: Tree) extends Producer[Int] {
+    def produceValues = traverse(n) 
+    def traverse(n: Tree) {
+      if (n != null) {
+        traverse(n.left)
+        traverse(n.right)
+        produce(n.elem)
+      }
+    }
+  }
+
+  class InOrder(n: Tree) extends Producer[Int] {
+    def produceValues = traverse(n) 
+    def traverse(n: Tree) {
+      if (n != null) {
+        traverse(n.left)
+        produce(n.elem)
+        traverse(n.right)
+      }
+    }
+  }
+
+  actor {
+    print("PreOrder:")
+    for (x &lt;- new PreOrder(tree).iterator) print(" "+x)
+    print("\nPostOrder:")
+    for (x &lt;- new PostOrder(tree).iterator) print(" "+x)
+    print("\nInOrder:")
+    for (x &lt;- new InOrder(tree).iterator) print(" "+x)
+    print("\n")
+  }
+}</programlisting>
+		</para>
+	</section>
+	
+</appendix>

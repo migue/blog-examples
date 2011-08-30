@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title><emphasis role="italic">Plugins</emphasis> del compilador <emphasis role="italic"
+			>Scala</emphasis></title>
+	<para>Aunque está fuera del ámbito del trabajo he decidido incluir un pequeño anexo en el que se
+		ilustra cómo se podría llevar a cabo la construcción de un plugin de compilador de manera
+		que nos permita modificar la funcionalidad del mismo.</para>
+	
+</appendix>
