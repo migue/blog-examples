@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title>¿Por qué <emphasis role="italic">Scala</emphasis>?</title>
+	<para>Durante este capítulo se cubrirán aspectos relativos  como qué es <emphasis role="italic"
+			>Scala</emphasis>, características de alto nivel del lenguaje o por qué deberíamos
+		escoger <emphasis role="italic">Scala</emphasis> como nuestro siguiente lenguaje de
+		programación. En la parte final del mismo analizaremos los objetivos perseguidos con el
+		desarrollo de este trabajo así como la estructura del mismo.</para>
+	<db:para>Debido a la creciente proliferación de una gran cantidad de diferentes lenguajes en las
+		plataformas <emphasis role="italic">JVM, .NET, OTP</emphasis> entre otras muchas ha surgido
+		el dilema entre los desarrolladores acerca de cuál debería ser el siguiente lenguaje de
+		progragramación que se debería aprender. Entre la amplia variedad de lenguajes disponibles
+		como <emphasis role="italic">Groovy, Erlang, Ruby o F#</emphasis> ¿por qué deberíamos
+		aprender <emphasis role="italic">Scala</emphasis> ?.</db:para>
+	<db:para>Durante este capítulo analizaremos las características de alto nivel del lenguaje
+		estableciendo una comparación con aquellos lenguajes con los que estemos más familiarizados.
+		Los programadores provenientes de la orientación a objetos así como aquellos cuyo origen es
+		la programación funcional rápidamente se sentirán cómodos con <emphasis role="italic"
+			>Scala</emphasis> dado que este lenguaje <emphasis role="bold">soporta ambos
+			paradigmas</emphasis>.  <emphasis role="italic">Scala</emphasis> es uno de esos extraños
+		lenguajes en los que se integran de manera satisfactoria las características de los
+		lenguajes orientados a objetos y los funcionales.</db:para>
+	
+	<section>
+		<title>¿Qué es <emphasis role="italic">Scala</emphasis>?</title>
+		<para><emphasis role="italic">Scala</emphasis> es un lenguaje de propósito general diseñado para
+			expresar los patrones de programación más comunes de una manera sencilla, elegante y
+			segura. Integra de manera sencilla características de orientación a objetos y lenguajes
+			funcionales, permitiendo de este modo que los desarrolladores puedan ser más
+			productivos. Su creador, <emphasis role="italic">Martin Odersky</emphasis>, y su equipo
+			comenzaron el desarrollo de este nuevo lenguaje en el año 2001, en el laboratorio de
+			métodos de programación en <emphasis role="italic">EPFL</emphasis><footnote>
+				<para><emphasis role="italic">École Polytechnique Fédérale de Lausanne </emphasis></para>
+			</footnote></para><para><emphasis role="italic">Scala</emphasis> hizo su aparación pública sobre la plataforma
+				<emphasis role="italic">JVM</emphasis> (<emphasis role="italic">Java Virtual
+				Machine</emphasis>) en enero de 2004 y unos meses después haria lo propio sobre la
+			plataforma <emphasis role="italic">.NET</emphasis>.</para>
+		<db:para>Aunque se trata de un elemento relativamente novedoso dentro del espacio de los lenguajes
+			de programación, ha adquirido una notable popularidad la cual se acrecenta día tras
+			día.</db:para>	
+	<section>
+		<title>Orientación a objetos</title>
+		<para>La popularidad de lenguajes como <emphasis role="italic">Java, C#</emphasis> o <emphasis
+					role="italic">Ruby</emphasis> han hecho que la programación orientada a objetos
+				sea un paradigma ampliamente aceptado entre la mayoría de desarrolladores. Aunque
+				existen numerosos lenguajes orientados a objetos en el ecosistema actual únicamente
+				podríamos encajar unos pocos si nos ceñimos a una definición estricta de orientación
+				a objetos. Un lenguaje orientado a objetos "<emphasis role="italic">puro</emphasis>"
+				debería presentar las siguientes características:<itemizedlist>
+					<listitem>
+						<para>Encapsulamiento/ocultación de información.</para>
+					</listitem>
+					<listitem>
+						<para>Herencia.</para>
+					</listitem>
+					<listitem>
+						<para>Polimorfismo/Enlace dinámico.</para>
+					</listitem>
+					<listitem>
+						<para>Todos los tipos predefinidos son objetos.</para>
+					</listitem>
+					<listitem>
+						<para>Todas las operaciones son llevadas a cabo mediante en envío de
+							mensajes a objetos.</para>
+					</listitem>
+					<listitem>
+						<para>Todos los tipos definidos por el usuario son objetos.</para>
+					</listitem>
+				</itemizedlist></para>
+			<para><emphasis role="italic">Scala</emphasis> da soporte a todas las características anteriores
+				mediante la utilización de un modelo puro de orientación a objetos muy similar al
+				presentado por <emphasis role="italic">Smalltalk</emphasis> (lenguaje creado por
+					<emphasis role="italic">Alan Kay</emphasis> sobre el año 1980).<footnote>
+					<para>http://en.wikipedia.org/wiki/Smalltalk </para>
+				</footnote></para><para>De manera adicional a todas las caracteríscticas puras de un lenguaje orientado a objetos
+				presentadas anteriormente, <emphasis role="italic">Scala</emphasis> añade algunas
+				innovaciones en el espacio de los lenguajes orientados a objetos:<itemizedlist>
+					<listitem>
+						<para>Composición modular de <emphasis role="italic">mixin</emphasis>.
+							Mecanismo que permite la composición de clases para el diseño de
+							componentes reutilizables evitando los problemas presentados por la
+							herencia múltiple. Similar a los interfaces <emphasis role="italic"
+								>Java</emphasis> y las clases abstractas. Por una parte se pueden
+							definir múltiples "contratos" (del mismo modo que los interfaces). Por
+							otro lado, se podrían tener implementaciones concretas de los
+							métodos.</para>
+					</listitem>
+					<listitem>
+						<para><emphasis role="italic">Self-type</emphasis>. Los <emphasis role="italic"
+								>mixin</emphasis> no dependen de ningún método y/o atributo de
+							aquellas clases con las que se está entremezclando aunque en
+							determinadas ocasiones será necesario hacer uso de las mismas. Esta
+							capacidad es conocida en <emphasis role="italic">Scala</emphasis> como
+								<emphasis role="italic">self-type</emphasis><footnote>
+								<para>Se ha optado por mantener el término original disponible en la
+									documentación del lenguaje.</para>
+							</footnote></para>
+					</listitem>
+					<listitem>
+						<para>Abstracción de tipos. Existen dos mecanismos principales de abstracción en los lenguajes
+							de programación: la parametrización y los miembros abstractos. <emphasis
+								role="italic">Scala</emphasis> soporta ambos estilos de abstracción
+							de manera uniforme para tipos y valores.</para>
+					</listitem>
+				</itemizedlist></para>
+	</section>
+	<section>
+			<title>Lenguaje funcional</title>
+			<para>La programación funcional es un paradigma en el que se trata la computación como
+				la evaluación de funciones matemáticas y se evitan los programas con estado y datos
+				que puedan ser modificados. Se ofrece adopta una visión más matemática del mundo en
+				el que los programas están compuestos por numerosas funciones que esperan una
+				determinada entrada y producen una determinada salida y, en muchas ocasiones, otras
+				funciones.</para>
+			<db:para>Otro de los aspectos de la programación funcional es la ausencia de efectos
+				colaterales gracias a los cuales los programas desarrollados son mucho más sencillos
+				de comprender y probar. Adicionalmente, se facilita la programación concurrente,
+				evitando que se convierta en un problema gracias a la ausencia de cambio.</db:para>
+			<db:para>Los lenguajes de programación que soportan este estilo de programación deberían ofrecer
+				algunas de las siguientes características:<itemizedlist>
+					<listitem>
+						<para>Funciones de primer nivel.</para>
+					</listitem>
+					<listitem>
+						<para>Closures</para>
+					</listitem>
+					<listitem>
+						<para>Asignación simple.</para>
+					</listitem>
+					<listitem>
+						<para>Evaluación tardía</para>
+					</listitem>
+					<listitem>
+						<para>Inferencia de tipos</para>
+					</listitem>
+					<listitem>
+						<para>Optimización del <emphasis role="italic">tail call</emphasis></para>
+					</listitem>
+					<listitem>
+						<para>Efectos <emphasis role="italic">monadic</emphasis></para>
+					</listitem>
+				</itemizedlist>Es importante tener claro que <emphasis role="italic"
+					>Scala</emphasis> no es un <emphasis role="bold">lenguaje funcional
+					puro</emphasis> dado que en este tipo de lenguajes no se permiten las
+				modificaciones y las variables se utilizan de manera matemática.<footnote>
+					<para>Un ejemplo de lenguaje funcional puro sería <emphasis role="italic"
+							>Haskell</emphasis></para>
+				</footnote>. <emphasis role="italic">Scala</emphasis> da soporte tanto a variables
+				inmutables (tambien conocidas como <emphasis role="bold">values</emphasis>)  como a
+				variables  que apuntan estados no permanentes</db:para>
+		</section>
+	<section>
+		<title>Lenguaje multiparadigma</title>
+		<para><emphasis role="italic">Scala</emphasis> ha sido el primero en incorporar y unificar la
+				programación funcional y la orientación a objetos en un lenguaje estáticamente
+				tipado. La pregunta es por qué necesitamas más de un estilo de programación.</para>
+			<db:para>El objetivo principal de la computación multiparadigma es ofrecer un
+				determinado conjunto de mecanismos de resolución de problemas de modo que los
+				desarrolladores puedan seleccionar la técnica que mejor se adapte a las
+				características del problema que se está tratando de resolver.</db:para>
+	</section>
+		<section>
+			<title>Lenguaje extensible y escalable</title>
+			<para>Uno de los principales objetivos del diseño de <emphasis role="italic">Scala</emphasis> es
+				la construcción de un lenguaje que permita el crecimiento y la escalabilidad en
+				función de la exigencia del desarrollador. <emphasis role="italic">Scala</emphasis>
+				puede ser utilizado como lenguaje de <emphasis role="italic">scripting</emphasis>
+				así como también se puede adoptar en el proceso de construcción de aplicaciones
+				empresariales. La conjunción de su abastracción de componentes, su sintaxis
+				reducida, el soporte para la orientación a objetos y funcional han contribuido a que
+				el lenguaje sea más escalable.</para>
+		</section>
+		<section>
+			<title>Ejecución sobre la <emphasis role="italic">JVM</emphasis></title>
+			<para>La características más  relevante de <emphasis role="italic">Java</emphasis> no es el
+				lenguaje sino su máquina virtual (<emphasis role="italic">JVM</emphasis>), una
+				pulida maquinaria que el equipo de <emphasis role="italic">HotSpot</emphasis> ha ido
+				mejorando a lo largo de los años. Puesto que <emphasis role="italic"
+					>Scala</emphasis> es un lenguaje basado en la <emphasis role="italic"
+					>JVM</emphasis> se integra a la perfección dentro con <emphasis role="italic"
+					>Java</emphasis> y su ecosistema (herramientas, <emphasis role="italic"
+					>IDEs</emphasis>, librerías, . . .) por lo que no será necesario desprenderse de
+				todas las inversiones hechas en el pasado.</para>
+			<db:para>El compilador de <emphasis role="italic">Scala</emphasis> genera <emphasis
+					role="italic">bytecode</emphasis> siendo indistinguible, a este nivel, el código
+				escrito en <emphasis role="italic">Java </emphasis>y el escrito en <emphasis
+					role="italic">Scala</emphasis>. Adicionalmente, puesto que se ejecuta sobre la
+					<emphasis role="italic">JVM</emphasis>, se beneficia del rendimiento y
+				estabilidad de dicha plataforma. Y siendo un lenguaje de tipado estático los
+				programas construidos con <emphasis role="italic">Scala</emphasis> se ejecutan tan
+				rápido como los programas <emphasis role="italic">Java</emphasis>.</db:para>
+		</section>
+		
+	</section>
+	
+	<section>
+		<title>En crisis</title>
+		<para>A pesar de las altas prestaciones que los procesadores están adquiriendo, los
+			desarrolladores software encuentran los mecanismos para agotarla. El motivo es que,
+			gracias al software, se están resolviendo problemas muy complejos, y esta tendencia
+			continuará creciendo, al menos en el futuro cercano.</para>
+		<db:para>La pregunta clave es si los fabricantes de procesadores serán capaces de sostener
+			la demanda de potencia y velocidad exigida por los desarrolladores.</db:para>		
+		<section>
+			<title>Ley de <emphasis role="italic">Moore</emphasis></title>
+			<para>Si nos hacemos eco de la ley postulada por <emphasis role="italic">Moore</emphasis> por el
+				año 1965<footnote>
+					<para>Concretamente la fecha data del 19 de Abril de 1965</para>
+				</footnote>, el número de transistores por circuito integrado se duplica cada dos
+				años aproximadamente. Sin embargo, muchos fabricantes están tocando techo con esta ley<footnote>
+					<para>http://www.gotw.ca/publications/concurrency-ddj.htm</para>
+				</footnote> y están apostando por los procesadores multinúcleo. Las buenas noticias
+				es que la potencia de los procesadores seguirá creciendo de manera notable aunque
+				las malas noticias es que los programas actuales y entornos de desarrollo
+				necesitarán cambiar para hacer uso de las ventajas ofrecidas por una <emphasis
+					role="italic">CPU</emphasis> con varios núcleos.</para>
+		</section>
+		<section>
+			<title>Programando para multinúcleo</title>
+			<para>¿Cómo se puede beneficiar el software de la nueva relución iniciada por los procesadores
+				multimedia?</para>
+			<db:para>Concurrencia. La concuncurrencia será, si no lo es ya, el modo en el que
+				podremos escribir soluciones software que nos permitan resolver problemas complejos,
+				distrubidos y empresariales, beneficiándonos de la productividad ofrecida por
+				múltiples núcleos. Al fin y al cabo, ¿quién no desea software eficiente?.</db:para>
+			<db:para>En el modelo tradicional de concurrencia basado en hilos los programas son "<emphasis
+					role="italic">troceados</emphasis>" en múltiples unidades de ejecución
+				concurrentes (<emphasis role="italic">threads</emphasis>) en el que cada de ellos
+				opera en un segmento de memoria compartida. En numerosas ocasiones el modelo
+				anterior ocasiona "<emphasis role="italic">condiciones de carrera</emphasis>"
+				complicadas de detectar así como siuaciones de "<emphasis role="italic"
+					>deadlocks</emphasis>" que ocasionan inversiones de semanas completas intentando
+				reproducir, aislar y subsanar el error. El origen de todas estos problemas no radica
+				en el modelo de hilos sino que reside en segmentos de memoria compartida. La
+				programación concurrente se ha convertido en un modelo demasiado complicado para los
+				desarrolladores por lo que necesitaríamos un mejor modelo de programación
+				concurrente que nos permita crear y mantener programas concurrentes de manera
+				sencilla.</db:para>
+			<db:para><emphasis role="italic">Scala</emphasis> adopta un enfoque completamente
+				diferente a la problemática de la concurrencia: el <emphasis role="bold">modelo
+					basado en actores</emphasis>. Un actor es un modelo matemático de computación
+				concurrente en el que se encapsulan datos, código y su propio hilo de control,
+				comunicándose de manera asíncrona mediante técnicas de paso de mensajes inmutables.
+				La arquitectura base de este modelo está basada en políticas de compartición cero y
+				componentes ligeros.</db:para>
+			<db:para>Haciendo un poco de historia, el modelo de actores fue propuesto por primera
+				vez por <emphasis role="italic">Carl Hewitt</emphasis> en el año <emphasis
+					role="italic">1973 </emphasis> en el famoso artículo "<emphasis role="italic">A
+					Universal Modular ACTOR Formalism for Artificial Intelligence </emphasis>" ,
+				para posteriormente ser mejorado por <emphasis role="italic">Gul Agha</emphasis>
+				con su “<emphasis role="italic">ACTORS: A Model of Concurrent Computation in
+					Distributed Systems</emphasis>”). </db:para>
+			<db:para>El primer lenguaje que llevó a cabo la implementación de este modelo fue <emphasis
+					role="italic">Erlang</emphasis>. Tras el éxito obtenido por el lenguaje en
+				lugares tan populares como <emphasis role="italic">Ericsson</emphasis> (su lugar de
+				nacimiento), <emphasis role="italic">Yahoo</emphasis> o <emphasis role="italic"
+					>Facebook</emphasis>, el <emphasis role="bold">modelo de actores </emphasis> se
+				ha convertido en una alternativa viable para solucionar la problemática derivada de
+				la concurrencia, por lo que <emphasis role="italic">Scala</emphasis> ha decidido
+				adoptar este mismo enfoque.</db:para>
+		</section>
+	</section>
+	<section>
+		<title>Objetivos</title>
+		<para>A lo largo de las secciones anteriores hemos descrito de manera superficial algunas de las
+			características más relevantes del lenguaje <emphasis role="italic">Scala</emphasis> así
+			como las motivaciones principales del mismo. El resto del trabajo estará dividido en las
+			siguientes secciones:<itemizedlist>
+				<listitem>
+					<para>Durante la primera sección, esta que nos ocupa, analizamos las
+						características generales del lenguaje y los objetivos del presente
+						documento.</para>
+				</listitem>
+				<listitem>
+					<para>La segunda sección abarcará los principales fundamentos del lenguaje,
+						describiendo tanto los mecanismos funcionales como la orientación a objetos,
+						ambos disponibles de manera nativa en el lenguaje.</para>
+				</listitem>
+				<listitem>
+					<para>Analizaremos, aunque no de manera excesivamente exhaustiva, el modelo de programación
+						concurrente propuesto por <emphasis role="italic">Scala</emphasis> (basado
+						en una librería de actores). Construiremos una pequeña serie de ejemplos que
+						nos permita poner en marcha los conocimientos adquiridos, tanto aquellos
+						relativos a la programación concurrente como los analizados en la primera
+						parte del trabajo.</para>
+				</listitem>
+				<listitem>
+					<para>Debido a limitaciones de tiempo y espacio no podremos abordar muchos temas interesantes
+						realacionados con el lenguaje <emphasis role="italic">Scala</emphasis>. por
+						lo que durante la última sección de este trabajo se propondrán numerosos
+						temas de ampliación: web funcional, otras aproximaciones de actores en
+							<emphasis role="italic">Scala</emphasis>, arquitectura del compilador
+							<emphasis role="italic">Scala</emphasis>, etc</para>
+				</listitem>
+			</itemizedlist></para>
+	</section>
+</chapter>
