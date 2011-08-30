@@ -1,0 +1,115 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.blogspot.miguelinlas3.phd.paragprog</groupId>
+	<artifactId>scala-intro</artifactId>
+	<!--version.begin-->
+	<version>1.0.0.SNAPSHOT</version><!--version.end-->
+	<packaging>pom</packaging>
+	
+	
+	<build>
+		<finalName>${project.artifactId}_${project.version}</finalName>
+		
+		<plugins>
+			
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-maven-plugin</artifactId>
+				<version>2.0.10</version>
+				<executions>
+					<execution>
+						<id>generate-help-pdf</id>
+						<goals>
+							<goal>generate-pdf</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<foCustomization>${basedir}/src/docbkx/custom.xsl
+							</foCustomization>
+							<paperType>A4</paperType>
+							<fonts>
+								<font>
+									<name>Calibri</name>
+									<style>normal</style>
+									<weight>normal</weight>
+									<embedFile> ${basedir}/src/fonts/CALIBRI.TTF</embedFile>
+									<metricsFile>
+										${project.build.directory}/fonts/CALIBRI-metrics.xml
+									</metricsFile>
+								</font>
+								<font>
+									<name>Calibri</name>
+									<style>italic</style>
+									<weight>normal</weight>
+									<embedFile> ${basedir}/src/fonts/CALIBRII.TTF</embedFile>
+									<metricsFile>
+										${project.build.directory}/fonts/CALIBRII-metrics.xml
+									</metricsFile>
+								</font>
+								<font>
+									<name>Calibri</name>
+									<style>normal</style>
+									<weight>bold</weight>
+									<embedFile> ${basedir}/fonts/CALIBRIB.TTF</embedFile>
+									<metricsFile>
+										${project.build.directory}/fonts/CALIBRIB-metrics.xml
+									</metricsFile>
+								</font>
+								<font>
+									<name>Georgia</name>
+									<style>normal</style>
+									<weight>normal</weight>
+									<embedFile> ${basedir}/fonts/georgia.ttf</embedFile>
+									<metricsFile>
+										${project.build.directory}/fonts/georgia-metrics.xml
+									</metricsFile>
+								</font>
+							</fonts>
+							<imgSrcPath>${basedir}/src/main/resources/</imgSrcPath>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<sourceDirectory>src/main/resources</sourceDirectory>
+					<xincludeSupported>true</xincludeSupported>
+					<includes>book.xml</includes>
+					<targetDirectory>target/help-pdf</targetDirectory>
+				</configuration>
+				<dependencies>
+					<!--<dependency>
+						<groupId>org.docbook</groupId>
+						<artifactId>docbook-xml</artifactId>
+						<version>5.0</version>
+						<scope>runtime</scope>
+						</dependency>
+						<dependency>
+						<groupId>com.sun.media</groupId>
+						<artifactId>jai_codec</artifactId>
+						<version>1.1.2_01</version>
+						</dependency> -->
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-fop-support</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<ansi>true</ansi>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+		</plugins>
+		
+	</build>
+	
+	
+</project>
