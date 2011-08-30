@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bibliography version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+
+<biblioentry>
+	<title>Scala in Action</title>	
+	<author>
+		<personname>Nilanjan Raychaudhuri</personname>
+	</author>
+	<date>Early Access started on March 2010</date>	
+</biblioentry>
+
+	<biblioentry>
+		<title>Scala in Depth</title>	
+		<author>
+			<personname>Joshua D. Suereth</personname>
+		</author>
+		<date>Early Access started on September 2010</date>	
+	</biblioentry>
+	
+	<biblioentry>
+		<title>Programming in Scala, Second Edition</title>
+		<author>
+			<personname>Martin Odersky</personname>
+		</author>
+		<author>
+			<personname>Lex Spoon</personname>
+		</author>
+		<author>
+			<personname>Bill Venners</personname>
+		</author>
+		<date>December 13, 2010</date>
+	</biblioentry>
+	
+	<biblioentry>
+		<title>Programming Scala: Tackle Multi-Core Complexity on the Java Virtual Machine</title>
+		<author>
+			<personname>Venkat Subramaniam</personname>
+		</author>
+		<date>Jul 2009</date>
+	</biblioentry>
+	<biblioentry>
+		<title>ACTORS: A Model of Concurrent Computation in Distributed Systems</title>
+		<author>
+			<personname>Agha, Gul Abdulnabi</personname>
+		</author>
+		<date>1985-06-01</date>		
+	</biblioentry>
+	<biblioentry>
+		<title>Martin Odersky interview: the future of <emphasis role="italic">Scala</emphasis></title>
+		<author>
+			<personname>http://www.infoq.com/interviews/martin-odersky-scala-future</personname>
+		</author>				
+	</biblioentry>
+	<biblioentry>
+		<title>Akka framework</title>
+		<author>
+			<personname>http://akka.io/</personname>
+		</author>				
+	</biblioentry>
+	<biblioentry>
+		<title>Play framework</title>
+		<author>
+			<personname>http://www.playframework.org/</personname>
+		</author>				
+	</biblioentry>
+	<biblioentry>
+		<title>Lift framework</title>
+		<author>
+			<personname>http://www.liftweb.net/</personname>
+		</author>				
+	</biblioentry>
+	<biblioentry>
+		<title>Haskell language</title>
+		<author>
+			<personname>http://www.haskell.org/haskellwiki/Haskell</personname>
+		</author>				
+	</biblioentry>
+	<biblioentry>
+		<title>Scalaz: pure functional data structures</title>
+		<author>
+			<personname>http://code.google.com/p/scalaz/</personname>
+		</author>				
+	</biblioentry>		
+</bibliography>
