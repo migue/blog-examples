@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title>Fundamentos de <emphasis role="italic">Scala</emphasis></title>
+	<para> A lo largo de este capítulo ahondaremos en los aspectos fundalmentales del lenguaje,
+		describiendo las características más relevantes tanto de la orientación a objectos como la
+		funcional. No olvidemos que <emphasis role="italic">Scala</emphasis>, tal y como hemos
+		descrito durante el capítulo anterior, permite la confluencia del paradigma funcional y la
+		orientación a objetos. </para>
+	<para>Aquellos lectores familiarizados con el lenguaje de programación <emphasis role="italic"
+			>Java</emphasis> encontrará muchos de los conceptos aquí descritos (sobre todo aquellos
+		conceptos relativos al paradigma funcional) similares aunque no son exactamente idénticos. </para>
+	<section>
+		<title>Clases y objetos</title>
+		<para>Del mismo modo que en todos los lenguajes orientados a objetos <emphasis role="italic"
+				>Scala</emphasis> permite la definición de clases en las que podremos añadir métodos
+			y atributos:</para>
+		<db:para>
+			<programlisting>class <classname>MyFirstClass</classname>{
+	val a = 1
+}</programlisting>
+		</db:para>
+		<para>Si deseamos instanciar un objeto de la clase anterior tendremos que hacer uso de la palabra
+			reservada <emphasis role="bold">new</emphasis>
+		</para>
+		<programlisting>val v = new MyFirstClass	</programlisting>
+		<db:para>En <emphasis role="italic">Scala</emphasis> existen dos tipos de variables,
+				<emphasis role="bold">vals y vars</emphasis>, que deberemos especificar a la hora de
+			definir las mismas:<itemizedlist>
+				<listitem>
+					<para>Se utilizará la palabra reservada <emphasis role="bold">val</emphasis>
+						para indicar que es inmutable. Una variable de este tipo es similar al uso
+						de <emphasis role="bold">final</emphasis> en <emphasis role="bold"
+							>Java</emphasis>. Una vez inicializada no se podrá reasignar
+						jamás.</para>
+				</listitem>
+				<listitem>
+					<para>De manera contraria, podremos indicar que una variable es de clase
+							<emphasis role="bold">var</emphasis>, consiguiendo con esto que su valor
+						pueda ser modificado durante todo su ciclo de vida.</para>
+				</listitem>
+			</itemizedlist></db:para>
+		<db:para>Uno de los principales mecanismos utilizados que garantizan la robustez de un
+			objeto es la afirmación que su conjunto de atributos (variables de instancia) permanece
+			constante a lo largo de todo el ciclo de vida del mismo. El primer paso para evitar que
+			agentes externos tengan acceso a los campos de una clase es declarar los mismos como
+				<emphasis role="bold">private</emphasis>. Puesto que los campos privados sólo podrán
+			ser accedidos desde métodos que se encuentran definidos en la misma clase, todo el
+			código podría modificar el estado del mismo estará localizado en dicha clase.<footnote>
+				<para>Por defecto, si no se especifica en el momento de la definición, los atributos
+					y/o métodos, de una clase tienen acceso público. Es decir, public es el
+					cualificador por defecto en Scala</para>
+			</footnote>
+		</db:para>
+		<db:para>El siguiente paso será incorporar funcionalidad a nuestras clases; para ello
+			podremos definir métodos mediante el uso de la palabra reservada <emphasis role="bold"
+				>def</emphasis>:</db:para>
+		<db:para>
+			<programlisting>class <classname>MyFirstClass</classname>{
+	var a = 1
+	def add(b:Byte):Unit={
+			a += b		
+	}
+}</programlisting>
+		</db:para>
+		<db:para>Una característica importante de los métodos en <emphasis role="italic"
+				>Scala</emphasis> es que todos los parámetros son inmutables, es decir, <emphasis
+				role="bold">vals</emphasis>. Por tanto, si intentamos modificar el valor de un
+			parámetro en el cuerpo de un método obtendremos un error del compilación:</db:para>
+		<programlisting>def addNotCompile(b:Byte) : Unit = {
+	b = 1  // Esto no compilará puesto que el 
+		  // parámetro b es de tipo val
+	a += b
+}</programlisting>
+		<db:para>Otro aspecto relevante que podemos apreciar en el código anterior es que no es
+			necesario el uso explícito de la palabra <emphasis role="bold">return</emphasis>,
+				<emphasis role="italic">Scala</emphasis> retornará el valor de la última expresión
+			que aparece en el cuerpo del método. Adicionalmente, si el cuerpo de la función retorna
+			una única expresión podemos obviar la utilización de las llaves.</db:para>
+		<db:para>Habitualmente los métodos que presentan un tipo de retorno <emphasis role="italic"
+				>Unit</emphasis> tienen efectos colaterales, es decir, modifican el estado del
+			objeto sobre el que actúan. Otra forma diferente de llevar a cabo la definición de este
+			tipo de métodos consiste en eliminar el tipo de retorno y el símbolo igual y englobar el
+			cuerpo de la función entre llaves, tal y como se indica a continuación:</db:para>
+		<programlisting>   class MyFirstClass {
+		private var sum = 0
+		def add(b:Byte) { sum += b }
+	}</programlisting>
+	</section>
+	<section>
+		<title>Reglas de inferencia de puntos y coma</title>
+		<para>La utilización de los puntos y coma como indicadores de terminación de sentencia es,
+			habitualmente, opcional aunque en determinadas ocasiones la ausencia de los mismos puede
+			llevarnos a resultados no esperados. Por noram general los saltos de línea son tratados
+			como puntos y coma salvo que algunas de las siguientes condiciones sea cierta:<itemizedlist>
+				<listitem>
+					<para>La línea en cuestión finaliza con una palabra que no puede actuar como
+						final de sentencia, como por ejemplo un espacio ("<emphasis role="bold"
+						> </emphasis>") o los operadores infijos.</para>
+				</listitem>
+				<listitem>
+					<para>La siguiente línea comienza con una palabra que no puede actuar como
+						inicio de sentencia.</para>
+				</listitem>
+				<listitem>
+					<para>La línea termina dentro de paréntesis <emphasis role="bold">( . . .
+							)</emphasis> o corchetes <emphasis role="bold">[ . . .]</emphasis>
+						puesto que éstos últimos no pueden contener múltiples sentencias.</para>
+				</listitem>
+			</itemizedlist></para>
+	</section>
+	<section>
+		<title><emphasis role="italic">Singleton</emphasis> objects</title>
+		<para><emphasis role="italic">Scala</emphasis> no soporta la definición de atributos estáticos en
+			las clases, incorporando en su lugar el concepto de <emphasis role="bold">singleton
+				objects</emphasis>. La definición de objetos de este tipo es muy similar a la de las
+			clases salvo que se utiliza la palabra reservada <emphasis role="bold">object</emphasis>
+			en lugar de <emphasis role="bold">class</emphasis>.</para>
+		<db:para>Cuando un <emphasis role="italic">objeto singleton</emphasis> comparte el mismo
+			nombre de una clase el primero de ellos es conocido como <emphasis role="bold">companion
+				object</emphasis> mientras que la clase se denomina <emphasis role="bold">companion
+				class</emphasis> del objeto singleton. Inicialmente, sobre todo aquellos
+			desarrolladores provenientes del mundo <emphasis role="italic">Java</emphasis>, podrían
+			ver este tipo de objetos como un contenedor en el que se podrían definir tantos métodos
+			estáticos como quisiéramos.</db:para>
+		<db:para>Una de las principales diferencias entre los singleton objects y las clases es que
+			los primeros no aceptan parámetros (no podemos instanciar un objeto singleton mediante
+			la palabra reservada <emphasis role="bold">new</emphasis>) mientras que las segundos si
+			lo permiten. Cada uno de los singleton objects es implementado mediante una instancia de
+			una synthetic class referenciada desde una variable estática, por lo que presentan la
+			misma semántica de inicialización que los estáticos de <emphasis role="italic"
+				>Java</emphasis>. Un objeto singleton es inicializado la primera vez que es accedido
+			por algún código.</db:para>
+	</section>
+	<section>
+		<title>Objetos funcionales</title>
+		<para>A lo largo de las secciones anteriores hemos adquirido una serie de conocimientos
+			básicos relativos a la orientación a objetos ofrecida por <emphasis role="italic"
+				>Scala</emphasis>. Durante las siguientes páginas analizaremos cómo se pueden
+			construir objetos funcionales, es decir, inmutables, mediante la definición de clases.
+			El desarrollo de esta sección nos permitirá ahondar en cómo los aspectos funcionales y
+			los de orientación a objetos confluyen en el lenguaje. Adicionalmente las siguientes
+			secciones no servirán como base para la introducción de nuveos conceptos de orientación
+			a objetos cómo parámetros de clase, sobreescritura, <emphasis role="italic">self
+				references</emphasis> o métodos entre otros muchos.</para>
+		<section>
+			<title>Números racionales</title>
+			<para>Los números racionales son aquellos que pueden ser expresados como un cociente
+					<emphasis role="bold">n/d</emphasis>. Durante las siguientes secciones
+				construiremos una clase que nos permita modelar el comportamiento de este tipo de
+				números. A continuación se presentan algunas de sus características principales:<itemizedlist>
+					<listitem>
+						<para>Suma/resta de números racionales. Se debe obtener un común denominador
+							de ambos denominadores y posteriormente sumar/restar los
+							numeradores.</para>
+					</listitem>
+					<listitem>
+						<para>Multiplicación de números racionales. Se multiplican los numeradores y
+							denominadores de los integrantes de la operación.</para>
+					</listitem>
+					<listitem>
+						<para>División de números racionales. Se intercambian el numerador y
+							denominador del operando que aparece a la derecha y posteriormente se
+							realiza una operación de multiplicación.</para>
+					</listitem>
+				</itemizedlist></para>
+		</section>
+		<section>
+			<title>Constructores</title>
+			<para>Puesto que hemos decidido que nuestros números racionales sean inmutables
+				necesitaremos que los clientes de esta clase proporcionen toda la información en el
+				momento de creación de un objeto. Podríamos comenzar nuestro diseño del siguiente
+				modo:</para>
+			<programlisting>class Rational (n:Int,d:Int)</programlisting>
+			<para>Los parámetros definidos tras el nombre de la clase son conocidos como <emphasis
+					role="bold">parámetros de clase</emphasis>. El compilador generará un
+				constructor primario en cuya signatura aparecerán los dos parámetros escritos en la
+				definición de la clase. Cualquier código que escribamos dentro del cuerpo de la
+				clase que no forme parte de un atributo o de un método será incluido en el
+				constructor primario indicado anteriormente.</para>
+		</section>
+		<section>
+			<title>Sobreescritura de métodos</title>
+			<para>Si deseamos sobreescribir un método heredado de una clase padre en la jerarquía
+				tendremos que hacer uso de la palabra reservada <emphasis role="bold"
+					>override</emphasis>. Por ejemplo, si en la clase <emphasis role="bold"
+					>Rational</emphasis> deseamos sobreescribir la implementación por defecto de
+					<emphasis role="bold">toString</emphasis> podríamos actuar del siguiente
+				modo:</para>
+			<programlisting>override def toString = n + "/" + d</programlisting>
+		</section>
+		<section>
+			<title>Precondiciones</title>
+			<para>Una de las características de los números racionales no admiten el valor cero como
+				denominador aunque sin embargo, con la definición actual de nuestra clase <emphasis
+					role="bold">Rational</emphasis> podríamos escribir código como:
+				<programlisting>new Rational(11,0)			</programlisting> algo que violaría nuestra
+				definición actual de números racionales. Dado que estamos construyendo una clase
+				inmutable y toda la información debe estar disponible en el momento que se invoca al
+				constructor este último deberá asegurarse de que el denominador indicado no toma el
+				valor cero (<emphasis role="bold">0</emphasis>).</para>
+			<db:para>La mejor aproximación para resolver este problema pasa por hacer uso de las
+					<emphasis role="italic"><emphasis role="bold"
+					>precondiciones</emphasis></emphasis>. Este concepto, incluido en el lenguaje,
+				representa un conjunto de restricciones que pueden establecerse sobre los valores
+				pasados a métodos o constructores y que deben ser satisfechas por el cliente que
+				realiza la llamada del método/constructor:
+				<programlisting>class Rational(n: Int, d: Int) {
+	require(d != 0)
+	override def toString = n +"/"+ d
+}</programlisting>
+				La restricciones se establecen mediante el uso del método <emphasis role="bold"
+					>require</emphasis> el cual espera un argumento booleano. En caso de que la
+				condición exigida no se cumpla el método <emphasis role="bold">require</emphasis>
+				disparará una excepción de tipo <emphasis role="bold"
+					>IllegalArgumentException</emphasis>.</db:para>
+		</section>
+		<section>
+			<title>Atributos y métodos</title>
+			<para>Definamos en nuestra clase un método público que reciba un número racional como
+				parámetro y retorne como resultado la suma de ambos operandos. Puesto que estamos
+				construyendo una clase inmutable el nuevo método deberá retornar la suma en un nuevo
+				número racional:
+				<programlisting>class Rational(n: Int, d: Int) { 
+	require(d != 0)
+	override def toString = n +"/"+ d
+	
+	// no compila: no podemos hacer <emphasis role="bold">that.d</emphasis> o <emphasis role="bold">that.n</emphasis>
+	// deben definirse como atributos
+<emphasis role="bold">	def add(that: Rational): Rational =
+		new Rational(n * that.d + that.n * d, d * that.d)</emphasis> 
+}				</programlisting>El
+				código anterior muestra una primera aproximación de solución aunque incorrecta dado
+				que se producirá un error de compilación. Aunque los <emphasis role="bold"
+					>parámetros de clase</emphasis> n y d están el ámbito del método <emphasis
+					role="bold">add</emphasis> solo se puede acceder a su valor en el objeto sobre
+				el que se realiza la llamada.</para>
+			<db:para>Para resolver el problema planteado en el fragmento de código anterior
+				tendremos que declarar d y n como <emphasis role="bold">atributos</emphasis> de la
+				clase <emphasis role="bold">Rational</emphasis>:
+				<programlisting>class Rational(n: Int, d: Int) {
+	require(d != 0)
+	val numer: Int = n // <emphasis role="bold">declaración de atributos</emphasis>
+	val denom: Int = d
+	
+	override def toString = numer +"/"+ denom
+	
+	def add(that: Rational): Rational =
+		new Rational(numer * that.denom + 
+					that.numer * denom, 
+					denom * that.denom)
+}				</programlisting>
+				Nótese que en los fragmentos de código anteriores estamos manteniendo la
+				inmutabilidad de nuestro diseño. En este caso, el operador de adición <emphasis
+					role="bold">add</emphasis> retorna un nuevo objeto racional que representa la
+				suma de ambos números, en lugar de realizar la suma sobre el objeto que realiza la
+				llamada.</db:para>
+			<db:para>A continuación incorporemos a nuestra clase un método privado que nos ayude a
+				determinar el máximo común divisor:
+				<programlisting>private def gcd(a:Int,b:Int):Int = 
+	if(b == 0)
+		a
+	else gcd(b,a%b)</programlisting>
+				El listado de código anterior nos muestra como podemos incorporar un <emphasis
+					role="bold">método privado</emphasis> a nuestra clase que, en este caso, nos
+				sirve como método auxiliar para calcular el máximo común divisor de dos números
+				enteros.</db:para>
+		</section>
+		<section>
+			<title>Operadores</title>
+			<para>La implementación actual de nuestra clase <emphasis role="bold"
+					>Rational</emphasis> es correcta aunque podríamos definirla de modo que su uso
+				resultara mucho más intuitivo. Una de las posibles mejoras que podríamos introducir
+				sería la inclusión de operadores:
+				<programlisting>def + (that: Rational): Rational =
+	new Rational(
+		numer * that.denom + that.numer * denom,
+		denom * that.denom
+		)
+def * (that: Rational): Rational =
+		new Rational(numer * that.numer, 
+					 denom * that.denom)</programlisting>De
+				este modo podríamos escribir código como el que a continuación se indica: <programlisting>var a = new Rational(2,5)
+var b = new Rational(1,5)
+var sum = a + b</programlisting><footnote>
+					<para>También podríamos escribir a.+(b) aunque en este caso el código resultante
+						sería mucho menos legible</para>
+				</footnote></para>
+		</section>
+	</section>
+	<section>
+		<title>Funciones y <emphasis role="italic">closures</emphasis></title>
+		<para>Hasta el momento hemos analizado algunas de las características más relevantes del
+			lenguaje <emphasis role="italic">Scala</emphasis>, poniendo de manifiesto la
+			incorporación de fundamentos de lenguajes funcionales así como de lenguajes orientados a
+			objetos.</para>
+		<db:para>Cuando nuestros programas crecen necesitamos hacer uso de un conjunto de
+			abstracciones que nos permitan dividir dicho programa en piezas más pequeñas y
+			manejables que permitan una mejor comprensión del mismo. <emphasis role="italic"
+				>Scala</emphasis> ofrece varios mecanismos para definir funciones que no están
+			presentes en <emphasis role="italic">Java</emphasis>. Además de los métodos, que no son
+			más que funciones miembro de un objeto, podemos hacer uso de funciones anidadas en
+			funciones, <emphasis role="bold">function literals</emphasis> y <emphasis role="bold"
+				>function values</emphasis>. Durante las siguientes secciones de este apartado
+			profundizaremos en alguno de los mecanismos anteriores no analizados en produndidad
+			anteriormente.</db:para>
+		<section>
+			<title>Funciones <emphasis role="italic">first-class</emphasis></title>
+			<para><emphasis role="italic">Scala</emphasis> incluye una de las características
+				principales del paradigma funcional: <emphasis role="bold">first class
+					functions</emphasis>. No sólamente podemos definir funciones e invocarlas sino
+				que también podemos definirlas como literales para, posteriormente, pasarlas como
+				valores.</para>
+			<db:para>Las funciones literales son compiladas en una clase que, cuando es instanciada,
+				se convierte en una <emphasis role="bold">function value</emphasis>. Por lo tanto,
+				la principal diferencia entre las funciones literales y las funciones valor es que
+				las primeras existen en el código fuente mientras que las segundas existen como
+				objetos en tiempo de ejecución.</db:para>
+			<db:para>A continuación se define un pequeño ejemplo de una función literal que suma el
+				valor 1 al número indicado: <programlisting>(x:Int) => x + 1</programlisting> Las
+				funciones valor son objetos propiamente dichos por lo que podemos almacenarlas en
+				variables o invocarlas mediante la notación de paréntesis habitual.</db:para>
+		</section>
+		<section>
+			<title><emphasis role="italic">Closures</emphasis></title>
+			<para>Las funciones literales que hemos visto hasta este momento han hecho uso, única y
+				exclusivamente, de los parámetros pasados a la función. Sin embargo, podríamos
+				definir funciones literales en las que se hace uso de variables definidas en otro
+				punto de nuestro programa: <programlisting>(x:Int) = x * other</programlisting> La
+				variable <emphasis role="italic">other</emphasis> es conocida como una <emphasis
+					role="italic">free variable</emphasis> puesto que la función no le da un
+				significado a la misma. Al contrario, la variable <emphasis role="italic"
+					>x</emphasis> es conocida como <emphasis role="italic">bound variable</emphasis>
+				puesto que tiene un significado en el contexto de la función. Si intentamos utilizar
+				esta función en un contexto en el que no está accesible una variable <emphasis
+					role="italic">other</emphasis> obtendremos un error de compilación indicándonos
+				que dicha variable no está disponible.</para>
+			<db:para>La <emphasis role="bold">función valor</emphasis> creada en tiempo de ejecución
+				a partir de la <emphasis role="bold">función literal</emphasis> es conocida como
+					<emphasis role="italic">closure</emphasis>. El nombre se deriva del acto de
+					"<emphasis role="italic">cerrar</emphasis>" la función literal mediante la
+				captura en el ámbito de la función de los valores de sus <emphasis role="italic"
+					>free variables</emphasis>. Una <emphasis role="bold">función valor</emphasis>
+				que no presenta <emphasis role="bold">free variables</emphasis>, creada en tiempo de
+				ejecución a partir de su <emphasis role="bold">función literal</emphasis> no es una
+				closure en el sentido más estricto de la definición dado que dicha función ya se
+				encuetra "<emphasis role="italic">cerrada</emphasis>" en el momento de su
+				escritura.</db:para>
+			<db:para>El fragmento de código anterior hace que nos planteemos la siguiente pregunta:
+				¿que ocurre si la variable <emphasis role="italic">other</emphasis> es modificada
+				después de que la closure haya sido creada? La respuesta es sencilla: en <emphasis
+					role="italic">Scala</emphasis> la closure tiene visión sobre el cambio ocurrido.
+				La regla anterior también se cumple en sentido contrario: su una closure modifica
+				alguno de sus valores capturados estos últimos son visibles fuera del ámbito de la
+				misma.</db:para>
+		</section>
+		<section>
+			<title><emphasis role="italic">Tail recursion</emphasis></title>
+			<para>A continuación presentamos una función recursiva que aproxima un valor mediante un
+				conjunto de repetidas mejoras hasta que es suficientemente bueno:
+				<programlisting>def aproximate (guess:Double):Double = 
+	if(isGoodEnough(guess) guess
+	else aproximate(improve(guess))</programlisting>
+				Las funciones que presentan este tipo de tipología (se llaman a si mismas en la
+				última sentencia del cuerpo de la función) son llamadas funciones <emphasis
+					role="italic">tail recursive</emphasis>. El compilador de <emphasis
+					role="italic">Scala</emphasis> detecta esta situación y reemplaza la última
+				llamada con un salto al comienzo de la función tras actualizar los parámetros de la
+				función con los nuevos valores.</para>
+			<db:para>El uso de <emphasis role="italic">tail recursion</emphasis> es limitado debido a que el
+				conjunto de instrucciones ofrecido por la máquina virtual (<emphasis role="italic"
+					>JVM</emphasis>) dificulta de manera notable la implementación de otros tipos de
+					<emphasis role="italic">tail recursion</emphasis>. <emphasis role="italic"
+					>Scala</emphasis> únicamente optimiza llamadas recursivas a una función dentro
+				de la misma. Si la recursión es indirecta, como la que se muestra en el siguiente
+				fragmento de código, no se puede llevar a cabo ningún tipo de optimización:
+				<programlisting>def isEven(x:Int): Boolean =
+	if(x==0) true else isOdd(x-1)
+def isOdd(x:Int): Boolean = 
+	if(x==0) false else isEven(x-1)</programlisting></db:para>
+		</section>
+	</section>
+	<section>
+		<title><emphasis role="italic">Currying</emphasis></title>
+		<para><emphasis role="italic">Scala</emphasis> no incluye un excesivo número de
+			instrucciones de control de manera nativa aunque nos permite llevar a cabo la definición
+			de nuestras propias construcciones de manera sencilla. A lo largo de esta seccion
+			analizaremos como definir nuestras propias abstracciones de control con un parecido muy
+			próximo a extensiones del lenguaje.</para>
+		<db:para>El primer paso consiste en comprender una de las técnicas más comunes de los
+			lenguajes funcionales: <emphasis role="bold">currying</emphasis>. Una <emphasis
+				role="bold">curried function</emphasis> es aplicada múltiples listas de argumentos
+			en lugar de una sola. El siguiente fragmento de código nos muestras una función
+			tradicional que recibe dos argumentos de tipo entero y retorna la suma de ambos:
+			<programlisting>def plainSum(x:Int, y:Int) = x + y</programlisting>A continuación se
+			muestras una <emphasis role="bold">curried function</emphasis> similar a la descrita en
+			el fragmento de código anterior:
+			<programlisting>def curriedSum(x:Int)(y:Int) = x + y</programlisting>Cuando ejecutamos
+			la sentencia <emphasis role="italic">curriedSum(9)(2)</emphasis> estamos obteniendo dos
+			llamadas tradicionales de manera consecutiva. La primera invocación recibe el parámetro
+			x y retorna una función valor para la segunda función. Esta segunda función recibe el
+			parámetro y. El siguiente código muestra una función <emphasis role="italic"
+				>first</emphasis> que lleva a cabo lo que haría la primera de las invocaciones de la
+			función <emphasis role="italic">curriedSum</emphasis> anterior:
+			<programlisting>def first(x: Int) = (y: Int) => x + y</programlisting>Invocando a la
+			función anterior con el valor <emphasis role="italic">1</emphasis> obtendríamos una
+			nueva función: <programlisting>def second = first(1)</programlisting>La invocación de
+			este segunda función con el parámetro 2 retornaría el resultado.</db:para>
+	</section>
+	<section>
+		<title><emphasis role="italic">Traits</emphasis></title>
+		<para>Los <emphasis role="italic">traits</emphasis> son la unidad básica de reutilización de
+			código en <emphasis role="italic">Scala</emphasis>. Un <emphasis role="italic"
+				>trait</emphasis> encapsula definiciones de métodos y atributos que pueden ser
+			reutilizados mediante un proceso de <emphasis role="italic">mixin</emphasis> llevado a
+			cabo en conjunción con las clases. Al contrario que en el mecanismo de herencia, en el
+			que únicamente se puede tener un padre, una clase puede llevar a cabo un proceso de
+				<emphasis role="italic">mixin</emphasis> con un número indefinido de <emphasis
+				role="italic">traits</emphasis>.</para>
+		<section>
+			<title>¿Cómo funcionan los <emphasis role="italic">traits</emphasis>?</title>
+			<para>La definición de un <emphasis role="italic">trait</emphasis> es similar a la de
+				una clase tradicional salvo que se utiliza la palabra reservada <emphasis
+					role="bold">trait</emphasis> en lugar de <emphasis role="bold">class</emphasis>.
+				<programlisting>trait MyFirstTrait {
+	def printMessage(){
+		println("This is my first trait")
+	}
+}</programlisting>Una
+				vez definido puede ser "<emphasis role="italic">mezclado</emphasis>" junto a una
+				clase mediante el uso de las palabras reservadas <emphasis role="italic"
+					>extend</emphasis> o <emphasis role="italic">with</emphasis> en XXXX
+				analizaremos las diferencias e implicaciones de cada una de estas alternativas):
+				<programlisting>class MyFirstMixin extends MyFirstTrait{
+	override def toString = "This is my first mixin in Scala"
+}</programlisting>Cuando
+				utilizamos la palabra reservada <emphasis role="italic">extends</emphasis> para
+				realizar el proceso de <emphasis role="italic">mixin</emphasis> estaremos heredando
+				de manera implícita las superclases del <emphasis role="italic"><emphasis
+						role="bold">trait</emphasis></emphasis>. Los métodos heredados de un
+					<emphasis role="italic"><emphasis role="bold">trait</emphasis></emphasis> se
+				utilizan del mismo modo que se utilizan los métodos heredados de una clase. De
+				manera adicional, un trait también define un tipo.</para>
+			<db:para>En el caso de que deseemos realizar un proceso de <emphasis role="italic"
+					>mixin</emphasis> en el que una clase ya indica un padre de manera explicita
+				mediante el uso <emphasis role="italic"><emphasis role="bold"
+					>extends</emphasis></emphasis> tendremos que utilizar la palabra reservada
+					<emphasis role="bold"><emphasis role="italic">with</emphasis></emphasis>. Si
+				deseamos incluir en el proceso de <emphasis role="italic">mixin</emphasis> múltiples
+					<emphasis role="italic"><emphasis role="bold">traits</emphasis></emphasis> no
+				trendremos más que incluir más cláusulas <emphasis role="italic"><emphasis
+						role="bold">with</emphasis></emphasis>.</db:para>
+			<db:para>Llegados a este punto podríamos pensar que los <emphasis role="italic"
+						><emphasis role="bold">traits</emphasis></emphasis> son como interfaces
+					<emphasis role="italic">Java</emphasis> con métodos concretos pero realmente
+				pueden hacer muchas más cosas. Por ejemplo, los <emphasis role="italic"><emphasis
+						role="bold">traits</emphasis></emphasis> pueden definir atributos y mantener
+				un estado. Realmente, en un <emphasis role="italic"><emphasis role="bold"
+						>trait</emphasis></emphasis> podemos hacer lo mismo que en una definición de
+				clase con una sintaxis similar aunque existen dos excepciones:<itemizedlist>
+					<listitem>
+						<para>Un trait no puede tener parámetros de clase (los parámetros pasados al
+							constructor primario de la clase).</para>
+					</listitem>
+					<listitem>
+						<para>Mientras que en las clases las llamadas a métodos de clases padre
+							(super.xxx) son enlazadas de manera estática en el caso de los traits
+							dichas llamadas son enlazadas dinámicamente. Si en una clase escribimos
+								<emphasis role="italic">super.method()</emphasis> sabremos en todo
+							momento que implementación del método será invocada. Sin embargo, el
+							mismo código escrito en un trait provoca un desconocimiento de la
+							implementación del método que será invocado en tiempo de ejecución.
+							Dicha implementación será determinada cada una de las veces que un trait
+							y una clase realizan un proceso de mixin. Este curioso comportamiento de
+							super es la clave que permite a los traits trabajar como <emphasis
+								role="italic">stackable modifications</emphasis><footnote>
+								<para>Se ha optado por mantener el término original</para>
+							</footnote> que veremos a continuación.</para>
+					</listitem>
+				</itemizedlist></db:para>
+		</section>
+		<section>
+			<title>Ejemplo: objetos rectangulares</title>
+			<para>Las librerías gráficas habitualmente presentan numerosas clases que representan
+				objetos rectangulares: ventanas, selección de una región de la pantalla, imágenes,
+				etc. Son muchos los métodos que nos gustaría tener en el API por lo que
+				necesitaríamos una gran cantidad de desarrolladores que poblaran la librería con
+				métodos para todos los objetos rectangulares. En <emphasis role="italic"
+					>Scala</emphasis>, los desarrolladores de la librería podrían hacer uso de
+					<emphasis role="italic">traits</emphasis> para incorporar los métodos necesarios
+				en aquellas clases que se deseen.</para>
+			<db:para>Una primera aproximación en la que no se hace uso de <emphasis role="italic"
+					>traits</emphasis> se muestra a
+				continuación:<programlisting>class Point(val x: Int, val y: Int)
+
+class Rectangle(val topLeft: Point, val bottomRight: Point) {
+
+	def left = topLeft.x
+
+	def right = bottomRight.x
+
+	def width = right - left
+
+	// más métodos . . .
+}</programlisting>Incorporemos
+				un nuevo componente gráfico:
+				<programlisting>abstract class Component {
+	def topLeft: Point
+	def bottomRight: Point
+	def left = topLeft.x
+	def right = bottomRight.x
+	def width = right - left
+	// más métodos . . .
+}</programlisting>Modifiquemos
+				ahora la aproximación anterior e incorporemos el uso de <emphasis role="italic"
+					>traits</emphasis>. Incorporemos un trait que incorpore la funcionalidad común
+				vista en los dos fragmentos de código anterior:
+				<programlisting>trait Rectangular {
+	def topLeft: Point
+	def bottomRight: Point
+	def left = topLeft.x
+	def right = bottomRight.x
+	def width = right - left
+	
+	// más métodos
+}</programlisting>La
+				clase <emphasis role="italic">Component</emphasis> podría realizar un proceso de mix
+				con el <emphasis role="italic">trait</emphasis> anterior para incorporar toda la
+				funcionalidad proporcionada por este último:
+				<programlisting>abstract class Component extends Rectangular{
+	// nuevos métodos para este tipo de widgets
+}</programlisting>Del
+				mismo modo que la clase <emphasis role="italic">Component</emphasis> , la clase
+					<emphasis role="italic">Rectangle</emphasis> podría realizar el proceso de
+					<emphasis role="italic">mixin</emphasis> con el <emphasis role="italic"
+					>trait</emphasis>
+				<emphasis role="italic">Rectangular</emphasis>:
+				<programlisting>class Rectangle(val topLeft: Point, val bottomRight: Point)
+										extends Rectangular {
+		// métodos propios de la clase rectangle
+}	</programlisting>
+			</db:para>
+		</section>
+		<section>
+			<title>Uso de <emphasis role="italic">traits</emphasis> como <emphasis role="italic"
+					>stackable modifications</emphasis></title>
+			<para>Hasta el momento hemos visto uno de los principales usos de los <emphasis
+					role="italic">traits</emphasis>: el enriquecimiento de interfaces. Durante la
+				sección que nos ocupa analizaremos otro de los usos más populares de los <emphasis
+					role="italic">traits</emphasis>: facilitar <emphasis role="italic">stackable
+					modifications</emphasis> en las clases. Los <emphasis role="italic"
+					>traits</emphasis> nos permitirán modificar los métodos de una clase y,
+				adicionalmente, nos permitirá apilarlas entre si.</para>
+			<db:para>Apilemos modificaciones sobre una cola de números enteros. Dicha cola tendrá
+				dos operaciones: <emphasis role="italic"><emphasis role="bold"
+					>put</emphasis></emphasis>, que añadirá números a la cola, y <emphasis
+					role="italic"><emphasis role="bold">get</emphasis></emphasis> que los sacará de
+				la misma. Generalmente las colas siguen el comportamiento "<emphasis role="italic"
+					>primero en entrar, primero en salir</emphasis>" por lo que el método <emphasis
+					role="italic"><emphasis role="bold">get</emphasis></emphasis> tendría que
+				retornar los elementos en el mismo orden en el que fueron introducidos.</db:para>
+			<db:para>Dada una clase que implementa el comportamiento descrito en el párrafo anterior
+				podríamos definir un trait que llevara a cabo modificaciones como:<itemizedlist>
+					<listitem>
+						<para>Multiplicar por dos todos cualquier elemento que se añada en la
+							cola.</para>
+					</listitem>
+					<listitem>
+						<para>Incrementar en una unidad cada uno de los elementos que se añaden en
+							la cola.</para>
+					</listitem>
+					<listitem>
+						<para>Filtrado de elementos negativos. Evita que cualquier número menor que
+							cero sea añadido a la cola.</para>
+					</listitem>
+				</itemizedlist></db:para>
+			<db:para>Los tres traits anteriores representan <emphasis role="bold">modificaciones</emphasis>
+				dado que no definen una cola por si mismos sino que llevan a cabo modificaciones
+				sobre la cola subyacente con la que realizan el proceso de <emphasis role="italic"
+					>mixin</emphasis>. Los <emphasis role="italic">traits</emphasis> también son
+				apilables: podríamos escoger cualquier subconjunto de los tres anteriores e
+				incorporarlos a una clase de manera que conseguiríamos una nueva clase con la
+				funcionalidad deseada. El siguiente fragmento de código representa una
+				implementación reducida del comportamiento de una cola descrito en el inicio de esta
+				sección:
+				<programlisting>import scala.collection.mutable.ArrayBuffer
+
+abstract class IntQueue {
+	def get(): Int
+	def put(x: Int)
+}
+
+
+class BasicIntQueue extends IntQueue {
+	private val buf = new ArrayBuffer[Int]
+	def get() = buf.remove(0)
+	def put(x: Int) { buf += x }
+}</programlisting>Realicemos
+				ahora un conjunto de modificaciones sobre la clase anterior; para ello, vamos a
+				hacer uso de los <emphasis role="italic">traits</emphasis>. El siguiente fragmento
+				de código muestra un <emphasis role="italic">trait</emphasis> que duplica el valor
+				de un elemento que se desea añadir a la cola:
+				<programlisting>trait Duplication extends IntQueue{
+	abstract override def put(x:Int) { super.put(2*x) }
+}</programlisting>Nótese
+				el uso de las palabras reservadas <emphasis role="bold">abstract
+				override</emphasis>. Esta combinación de modificadores sólo puede ser utilizada en
+				los <emphasis role="italic">traits</emphasis> y no en las clases, e indica que el
+					<emphasis role="italic">trait</emphasis> debe ser integrado (<emphasis
+					role="italic">mixed</emphasis>) con una clase que presenta una implementación
+				concreta del método en cuestión.</db:para>
+			<db:para>A continuación se muestra un ejemplo de uso del <emphasis role="italic">trait</emphasis>
+				anterior:
+				<programlisting>scala> class MyQueue extends BasicIntQueue with Doubling
+defined class MyQueue
+
+scala> val queue = new MyQueue
+queue: MyQueue = MyQueue@91f017
+
+scala> queue.put(10)
+
+scala> queue.get()
+res12: Int = 20</programlisting>Para
+				analizar el mecanismo de apilado de modificaciones implementemos en primer lugar los
+				dos traits restantes que hemos descrito al inicio de esta sección:
+				<programlisting>trait Increment extends IntQueue{
+	abstract override def put(x:Int) { super.put(x + 1) }
+	}
+
+trait Filter extends IntQueue{
+	abstract override def put(x:Int) { if ( x >= 0 ) super.put(x) }
+}</programlisting>Una
+				vez tenemos disponibles las modificaciones podríamos generar una nueva cola del modo
+				que más nos interese:
+				<programlisting>scala> val queue = (new BasicIntQueue
+					with Increment with Filter)
+queue: BasicIntQueue with Increment with Filter...
+
+scala> queue.put(-1); queue.put(0); queue.put(1)
+
+scala> queue.get()
+res15: Int = 1
+
+scala> queue.get()
+res16: Int = 2</programlisting>El
+				orden de los <emphasis role="italic">mixins</emphasis> es importante . De manera
+				resumida, cuando invocamos a un método de una clase con <emphasis role="italic"
+					>mixins</emphasis> el método del <emphasis role="italic">trait</emphasis>
+				definido más a la derecha es el primero en ser invocado. Si dicho método invoca a
+					<emphasis role="italic"><emphasis role="bold">super</emphasis></emphasis> este
+				invocará al <emphasis role="italic">trait</emphasis> que se encuentra más a la
+				izquierda y así sucesivamente. En el ejemplo anterior, el método <emphasis
+					role="bold">put</emphasis> del <emphasis role="italic">trait Filter</emphasis>
+				será invocado en primer lugar, por lo que aquellos números menores que cero no serán
+				incorporados a la cola. El método <emphasis role="bold">put</emphasis> del <emphasis
+					role="italic">trait</emphasis>
+				<emphasis role="italic">Filter</emphasis> sumará el valor uno a cada uno de los
+				números (mayores o iguales que cero).</db:para>
+		</section>
+		<section>
+			<title><emphasis role="italic">Traits</emphasis>: ¿si o no?</title>
+			<para>A continuación se presentan una serie de criterios más o menos objetivos que
+				pretenden ayudar al lector a determinar cuando debería usar estas construcciones
+				proporcionadas por el lenguaje <emphasis role="italic">Scala</emphasis>:<itemizedlist>
+					<listitem>
+						<para>Si el comportamiento no pretende ser reutilizado entonces encapsularlo
+							en una clase.</para>
+					</listitem>
+					<listitem>
+						<para>Si el comportamiento pretende ser reutilizado en múltiples clases no
+							relacionadas entonces construir un <emphasis role="italic"
+								>trait</emphasis>.</para>
+					</listitem>
+					<listitem>
+						<para>Si se desee que una clase <emphasis role="italic">Java</emphasis>
+							herede de nuestra funcionalidad entonces deberemos utilizar una clase
+							abstracta.</para>
+					</listitem>
+					<listitem>
+						<para>Si la eficiencia es importante deberíamos inclinarnos hacia el uso de
+							las clases. La mayoría de los entornos de ejecución <emphasis
+								role="italic">Java</emphasis> hacen una llamada a un método virtual
+							de una clase mucho más rápido que la invocación de un método de un
+							interfaz. Los <emphasis role="italic">traits</emphasis> son compilados a
+							interfaces y podríamos penalizar el rendimiento.</para>
+					</listitem>
+					<listitem>
+						<para>Si tras todas las opciones anteriores no tenemos claro qué
+							aproximación deseamos utilizar deberíamos comenzar por el uso de
+								<emphasis role="italic">traits</emphasis>. Lo podremos cambiar en el
+							futuro y, generalmente, mantedremos más opciones abiertas.</para>
+					</listitem>
+				</itemizedlist></para>
+		</section>
+	</section>
+	<section>
+		<title>Patrones y clases <emphasis role="italic">case</emphasis></title>
+		<para>Aquellos lectores que hayan progamado en algún lenguaje perteneciente al paradigma
+			funcional reconocerán el uso de la concordancia de patrones. Las clases <emphasis
+				role="italic">case</emphasis> son un concepto relativamente novedoso y nos permiten
+			incorporar el mecanismo de <emphasis role="italic">matching</emphasis> de patrones sobre
+			objetos sin la necesidad de código repetitivo. De manera general, no tendremos más que
+			prefijar la definición de una clase con la palabra reservada <emphasis role="italic"
+					><emphasis role="bold">case</emphasis></emphasis> para indicar que la clase
+			definida pueda ser utilizada en la definición de patrones.</para>
+		<db:para>A lo largo de esta sección analizaremos los dos conceptos anteriores en conjunción con un
+			conjunto de ejemplos con el objetivo de ilustrar y amenizar la lectura de esta
+			sección.</db:para>
+		<section>
+			<title>Clases <emphasis role="italic">case</emphasis></title>
+			<para>El uso del modificador <emphasis role="italic"><emphasis role="bold"
+						>case</emphasis></emphasis> provoca que el compilador de <emphasis
+					role="italic">Scala</emphasis> incorpore una serie de facilidades a la clase
+				indicada. </para>
+			<para>En primer lugar incorpora un <emphasis role="italic">factory-method</emphasis> con
+				el nombre de la clase. Gracias a esto podríamos escribir código como <emphasis
+					role="italic">Foo("x")</emphasis> para construir un objeto <emphasis
+					role="italic">Foo</emphasis> en lugar de <emphasis role="italic">new
+					Foo("x")</emphasis>. Una de las principales ventajas de este tipo de métodos es
+				la ausencia de operadores <emphasis role="italic"><emphasis role="bold"
+						>new</emphasis></emphasis> cuando los anidamos:
+				<programlisting>val op = BinaryOperation("+", Number(1), v)	</programlisting> Otra
+				funcionalidad sintáctica incorporada por el compilador es que todos los argumentos
+				en la lista de parámetros incorporan de manera implicita el prefijo <emphasis
+					role="italic"><emphasis role="bold">val</emphasis></emphasis> por lo que éstos
+				últimos serán atributos de clase. Por último, pero no por ello no menos importante,
+				el compilador añade implementaciones "instintivas" de los métodos <emphasis
+					role="italic"><emphasis role="bold">toString</emphasis></emphasis>, <emphasis
+					role="italic"><emphasis role="bold">hashCode</emphasis></emphasis> e <emphasis
+					role="italic"><emphasis role="bold">equals</emphasis></emphasis>.</para>
+			<db:para>Todas estas facilidades incorporadas acarrean un pequeño coste: las clases y
+				objetos generados son un poco más grandes<footnote>
+					<para>Son más grandes porque se generan métodos adicionales y se incorporan
+						atributos implícitos para cada uno de los parámetros del constructor</para>
+				</footnote> y tenemos que incorporar la palabra <emphasis role="italic"><emphasis
+						role="bold">case</emphasis></emphasis> en las definiciones de nuestras
+				clases. La principal ventaja de este tipo de clases es que soportan la concordancia
+				de patrones.</db:para>
+		</section>
+		<section>
+			<title>Patrones: estructura y tipos</title>
+			<para>La estructura general de un patrón en <emphasis role="italic">Scala</emphasis>
+				presenta la siguiente estructura:
+				<programlisting>selector match { alternatives }	</programlisting> Incorporan un
+				conjunto de <emphasis role="italic">alternativas</emphasis> en las que cada una de
+				ellas comienza por la palabra reservada <emphasis role="italic"><emphasis
+						role="bold">case</emphasis></emphasis>. Cada una de estas alternativas
+				incorpora un patrón y una o más expresiones que serán evaluadas en caso de que se
+				produzca la concordancia del patrón. Se utiliza el símbolo de flecha (<emphasis
+					role="italic"><emphasis role="bold">=></emphasis></emphasis>) para separar el
+				patrón de las expresiones.</para>
+			<db:para>Como hemos visto al comienzo de esta sección la sintaxis de los patrones es
+				sumamente sencilla por lo que vamos a profundizar en los diferentes tipos de
+				patrones que podemos construir. </db:para>
+			<section>
+				<title>Patrones <emphasis role="italic">wildcard</emphasis></title>
+				<para>El patrón <emphasis role="bold">(_)</emphasis> concuerda con cualquier objeto
+					por lo que podríamos utilizarlo como una alternativa <emphasis role="italic"
+						>catch-all</emphasis> tal y como se muestra en el siguiente ejemplo:
+					<programlisting>expression match {
+	case BinaryOperation(op,leftSide,rightSide) =>
+		println(expression + " is a BinaryOperation")
+	case _ =>
+	}</programlisting></para>
+			</section>
+			<section>
+				<title>Patrones constantes</title>
+				<para>Un patrón constante concuerda única y exclusivamente consigo mismo. El
+					siguiente fragmento de código muestra algunos ejemplos de patrones constantes:
+					<programlisting>def describe(x: Any) = x match {
+	case 5 => "five"
+	case true => "truth"
+	case "hello" => "hi!"
+	case Nil => "this is an empty list"
+	case _ => "anything else"
+}</programlisting></para>
+			</section>
+			<section>
+				<title>Patrones variables</title>
+				<para>Un patrón variable concuerda con cualquier objeto, del mismo modo que los
+					patrones <emphasis role="italic">wildcard</emphasis>. A diferencia de los
+					patrones <emphasis role="italic">wildcard</emphasis>, <emphasis role="italic"
+						>Scala</emphasis> enlaza la variable al objeto, por lo que posteriormente
+					podremos utilizar dicha variable para actuar sobre el objeto:
+					<programlisting>expr match {
+	case 0 => "zero value"
+	case somethingElse => "not zero: "+ somethingElse + " value"
+} </programlisting></para>
+			</section>
+			<section>
+				<title>Patrones constructores</title>
+				<para>Son en este tipo de construcciones donde los patrones se convierten en una
+					herramienta muy poderosa. Básicamente están formados por un nombre y un número
+					indefinido de patrones. Asumiendo que el nombre designa una clase de tipo
+						<emphasis role="bold">case</emphasis> este tipo de patrones comprobarán
+					primero si el objeto pertenece a dicha clase, para, posteriormente comprobar si
+					los parámetros del constructor concuerdan con el conjunto de patrones extra
+					indicados.</para>
+				<db:para>La definición anterior puede no resultar demasiado explicativa por lo que a
+					continuación se incluye un pequeño ejemplo en el que se comprueba que el objeto
+					de primer nivel es de tipo <emphasis role="italic">BinaryOperation</emphasis> y
+					que su tercer argumento es de tipo <emphasis role="italic">Number</emphasis> y
+					su atributo de clase vale 0:
+					<programlisting>expr match {
+	case BinaryOperation("+", e, Number(0)) 
+			=> println("a deep match")
+	case _ =>
+}</programlisting></db:para>
+			</section>
+			<section>
+				<title>Patrones de secuencia</title>
+				<para>Podemos establecer patrones de concordancia sobre listas o arrays del mismo modo que lo
+					hacemos para las clases. Deberá utilizarse la misma sintáxis aunque ahora
+					podremos indicar cualquier número de elementos en el patrón. </para>
+				<para>El siguiente fragmento de código muestra un patrón que comprueba una lista de
+					tres elementos cuyo primer valor toma 0:
+					<programlisting>expr match {
+	case List(0, _, _) => println("found it")
+	case _ =>
+}</programlisting></para>
+			</section>
+			<section>
+				<title>Patrones tipados</title>
+				<para>Podemos utilizar este tipo de construcciones como reemplazo de las comprobaciones y
+					conversiones de tipos:
+					<programlisting>def genericSize(x: Any) = x match {
+	case s: String => s.length
+	case m: Map[_, _] => m.size
+	case _ => -1
+}	</programlisting>
+					El método <emphasis role="italic">genericSize</emphasis> retorna la longitud de
+					un objeto cualquiera. El patrón "<emphasis role="italic">s:String</emphasis>" es
+					un patrón tipado: cualquier instancia no nula de tipo <emphasis role="italic"
+						>String</emphasis> concordará con dicho patrón. La variable de patrón
+						<emphasis role="italic"><emphasis role="bold">s</emphasis></emphasis> hará
+					referencia a dicha cadena.</para>
+			</section>
+		</section>
+	</section>
+	<section>
+		
+		<title>Conclusiones</title>
+		<para>A lo largo de este capítulo hemos analizado varias de las características principales del
+			lenguaje de programación <emphasis role="italic">Scala</emphasis>, haciendo especial
+			hincapié en como el lenguaje incorpora funcionalidades provenientes de los paradigmas
+			funcional y orientado a objetos.</para>
+		<db:para>Las secciones anteriores nos permitirán comenzar a escribir nuestros primeros
+			programas en <emphasis role="italic">Scala</emphasis> aunque nos faltaría un largo
+			camino para convertirnos en unos expertos en la materia. Para el lector más interesado a
+			continuación se indican algunos conceptos en los que se podría profundizar:<itemizedlist>
+				<listitem>
+					<para>Interoperabilidad entre Scala y Java.</para>
+				</listitem>
+				<listitem>
+					<para>Parametrización de tipos.</para>
+				</listitem>
+				<listitem>
+					<para>Extractors.</para>
+				</listitem>
+				<listitem>
+					<para>Trabajar con XML.</para>
+				</listitem>
+				<listitem>
+					<para>Inferencia de tipos</para>
+				</listitem>
+				<listitem>
+					<para>. . .</para>
+				</listitem>
+			</itemizedlist>En la siguiente parte del trabajo analizaremos el modelo de actores
+			propuesto por <emphasis role="italic">Scala</emphasis> y cómo esta aproximación nos
+			permitirá construir aplicaciones concurrentes de manera más sencilla.</db:para>
+	</section>
+</chapter>
