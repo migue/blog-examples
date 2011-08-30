@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title><emphasis role="italic">Actors</emphasis> y concurrencia</title>
+	<para>En muchas ocasiones cuando estamos escribiendo nuestros programas necesitamos que muchas de
+		sus partes se ejecuten de manera independiente, es decir, de manera concurrente. Aunque el
+		soporte introducido por <emphasis role="italic">Java</emphasis> es suficiente, a medida que
+		la complejidad y tamaño de los programas se incrementan, conseguir que nuestro código
+		concurrente funcione de manera correcta se convierte en una tarea complicada. Los actores
+		incluyen un modelo de concurrencia más sencillo con el que podremos evitar la problemática
+		habitual ocasionada por el modelo de concurrencia nativo de <emphasis role="italic">Java</emphasis>.</para>
+	<db:para>Durante este capítulo presentaremos los fundamentos del modelo de actores y como
+		podremos utilizar la librería de actores facilitada <emphasis role="italic">Scala</emphasis>.</db:para>
+	<section>
+		<title>Problemática</title>
+		<para>La plataforma <emphasis role="italic">Java</emphasis> proporciona de manera nativa un modelo
+			de hilos basado en bloqueos y memoria compartida. Cada uno de los objetos lleva asociado
+			un monitor que puede ser utilizado para realizar el control de acceso de múltiples hilos
+			sobre los datos. Para utilizar este modelo debemos decidir que datos queremos compartir
+			entre múltiples hilos y establecer como <emphasis role="italic"><emphasis role="bold">synchronized</emphasis></emphasis> aquellas secciones de código que acceden a
+			segmentos de datos compartidos. En tiempo de ejecución, Java utiliza un mecanismo de
+			bloqueo con el que se garantiza que en un instante de tiempo <emphasis role="bold">T</emphasis> un único hilo accede a una sección sincronizada <emphasis role="bold">S</emphasis>. Los desarrolladores han encontrado numerosos problemas  para
+			construir aplicaciones robustas con esta aproximación, especialmente cuando los
+			problemas crecen en tamaño y complejidad. En cada punto del programa el desarrollador
+			debe razonar sobre los datos modificados y/o accedidos que pueden ser accedidos por
+			otros hilos y establecer los bloqueos necesarios.</para>
+		<db:para>Añadiendo un nuevo inconveniente a los descritos en el párrafo anterior, los
+			procesos de prueba no son fiables cuando tratamos con códigos multihilo. Dado que los
+			hilos son no deterministas, podríamos probar nuestra aplicaciones miles de veces de
+			manera satisfactoria y obtener un error la primera vez que se ejecuta el mismo código en
+			la máquina de nuestro cliente.</db:para>
+		<db:para>La aproximación seguida por <emphasis role="italic">Scala</emphasis><footnote><para>Realmente Scala ofrece el modelo de actores mediante una librería del lenguaje en lugar de
+					manera nativa</para></footnote> para resolver
+			el problema de la concurrencia ofrece un <emphasis role="bold">modelo
+				alternativo</emphasis> de <emphasis role="bold">no compartición y paso de
+				mensajes</emphasis>. En la siguiente sección se ofrecerá una definición resumida del
+			modelo de actores.</db:para>
+	</section>
+	<section>
+		<title>Modelo de actores</title>
+		<para>El modelo de actores ofrece una solución diferente al problema de la concurrencia. En lugar
+			de procesos interactuando mediante memoria compartida, el modelo de actores ofrece una
+			solución basada en buzones y paso de mensajes asíncronos. En estos buzones los mensajes
+			pueden ser almacenados y recuperados para su procesamiento por otros actores. En lugar
+			de compartir variables en memoria, el uso de estos buzones nos permite aislar cada uno
+			de los procesos.</para>
+		<db:para>Los actores son entidades independientes que no comparten ningún tipo de memoria
+			para llevar a cabo el proceso de comunicación. De hecho, los actores únicamente se
+			pueden comunicar a través de los buzones descritos en el párrafo anterior. En esta
+			aproximación de concurrencia no existen bloqueos ni secciones sincronizadas por lo que
+			los problemas derivados de las mismas (deadlocks, pérdida de actualizaciones de datos, .
+			. .) no existen en este modelo. Los actores están pensados para trabajar de manera
+			concurrente, no de modo secuencial.</db:para>
+		<db:para>El modelo de actores no es una novedad: <emphasis role="italic">Erlang</emphasis>
+			basa su modelo de concurrencia en actores en lugar de hilos. De hecho, la popularidad
+			alcanzada por <emphasis role="italic">Erlang</emphasis> en determinados ámbitos
+			empresariales han hecho que la popularidad del modelo de actores haya crecido de manera
+			notable y lo ha convertido en una opción viable para otros lenguajes.</db:para>
+	</section>
+	<section>
+		<title>Actores en <emphasis role="italic">Scala</emphasis></title>
+		<para>Para implementar un actor en <emphasis role="italic">Scala</emphasis> no tenemos más que
+			extender <emphasis role="italic">scala.actors.Actor</emphasis> e implementar el método
+				<emphasis role="italic">act</emphasis>. El siguiente fragmento de código ilustra un
+			actor sumamente simple que no realiza nada con su buzón:
+			<programlisting>import scala.actors._
+
+object FooActor extends Actor{
+	def act(){
+		for(i &lt;- 1 to 11){
+			println("Executing actor!")
+			Thread.sleep(1000)
+		}
+	}
+}</programlisting>Si
+			deseamos ejecutar un actor no tenemos más que invocar a su método <emphasis role="italic">start()</emphasis>
+			<programlisting>scala> FooActor.start()
+res0: scala.actors.Actor = FooActor$@681070</programlisting>
+			Otro mecanismo diferente que nos permitiría instanciar un actor sería hacer uso del
+			método de utilidad <emphasis role="italic">actor</emphasis> disponible en <emphasis role="italic">scala.actors.Actor</emphasis>:
+			<programlisting>scala> import scala.actors.Actor._
+
+scala> val otherActor = actor {
+	for (i &lt;- 1 to 11)
+		println("This is other actor.")
+		Thread.sleep(1000)
+}</programlisting>Hasta
+			el momento hemos visto como podemos crear un actor y ejecutarlo de manera independiente
+			pero, ¿cómo conseguimos que dos actores trabajen de manera conjunta? Tal y como hemos
+			descrito en la sección anterior, los actores se comunican mediante el paso de mensajes.
+			Para enviar un mensaje haremos uso del <emphasis role="bold">operador
+			!</emphasis>.</para>
+		<para>Definamos ahora un actor que haga uso de su buzón, esperando por un mensaje e imprimiendo
+			aquello que ha recibido:
+			<programlisting>val echoActor = actor {
+	while (true) {
+		receive {
+			case msg =>
+				println ("Received message " + msg)
+		}
+	}
+}</programlisting>
+			Cuando un actor envía un mensaje no se bloquea y cuando lo recibe no es interrumpido. El
+			mensaje enviado queda a la espera en el buzón del receptor hasta que este último ejecute
+			la instrucción <emphasis role="italic"><emphasis role="bold"
+				>receive</emphasis></emphasis>. El siguiente fragmento de código ilustra el
+			comportamiento descrito:
+			<programlisting>scala> echoActor ! "My First Message"
+Received message My First Message
+
+scala> echoActor ! 11
+Received message 11</programlisting>
+		</para>
+		<section>
+			<title>Buenas prácticas</title>
+			<para>Llegados a este punto conocemos los fundamentos básicos para escribir nuestros propios
+				actores. El punto fuerte de los métodos vistos hasta este momento es que ofrecen un
+				modelo de programación concurrente basado en actores por lo que, en la medida que
+				podamos escribir siguiendo este estilo nuestro código será más sencillo de depurar y
+				tendrá menos <emphasis role="italic">deadlocks</emphasis> y condiciones de carrera.
+				Las siguientes secciones describen,de manera breve, algunas directrices que nos
+				permitirán adopotar un estilo de programación basado en actores.</para>
+			<section>
+				<title>Ausencia de bloqueos</title>
+				<para>Un actor no debería bloquearse mientras se encuentra procesando un mensaje. El problema
+					radica en que mientras un actor se bloquea, otro actor podría realizar una
+					petición sobre el primero. Si el actor se bloquea en la primera petición  no se
+					dará cuenta de una segunda solicitud. En el peor de los casos, se podría
+					producir un <emphasis role="italic">deadlock</emphasis> en el que varios actores
+					están esperando por otros actores que a su vez están bloqueados.</para>
+				<db:para>En lugar de bloquearse, el actor debería esperar la llegada de un mensaje
+					indicando que la acción está lista para ser ejecutada. Esta nueva disposición,
+					por norma general, implicará la participación de otros actores.</db:para>
+			</section>
+			<section>
+				<title>Comunicación exclusiva mediante mensajes</title>
+				<para>La clave de los actores es el <emphasis role="bold">modelo de no compartición</emphasis>,
+					ofreciendo un espacio seguro (el método <emphasis role="italic">act</emphasis>
+					de cada actor) en el que podríamos razonar de manera secuencial. Expresándolo de
+					manera diferente, los actores nos permiten escribir programas multihilo como un
+					conjunto independiente de programas monohilo. La simplificación anterior se
+					cumple siempre y cuando el único mecanismo de comunicación entre actores sea el
+					paso de mensajes.</para>
+			</section>
+			<section>
+				<title>Mensajes inmutables</title>
+				<para>Puesto que el modelo de actores provee un entorno monohilo dentro de cada método <emphasis
+						role="italic">act</emphasis> no debemos preocuparnos si los objetos que
+					utilizamos dentro de la implementación de dicho método son <emphasis
+						role="italic">thread-safe</emphasis>. Este es el motivo por el que el modelo
+					de actores es llamado <emphasis role="italic">shared-nothing</emphasis>, los
+					datos están confinados en un único hilo en lugar de ser compartidos por
+					varios.</para>
+				<db:para>La excepción a esta regla reside en la información de los mensajes
+					intercambiados entre actores dado que es compartida por varios de ellos. Por
+					tanto, tendremos que preocuparnos de que los mensajes intercambiados entre
+					actores sean <emphasis role="italic">thread-safe</emphasis>.</db:para>
+			</section>
+			<section>
+				<title>Mensajes autocontenidos</title>
+				<para>Cuando retornamos un valor al finalizar la ejecución de un método el fragmento de código
+					que realiza la llamada se encuentra en una posición idónea para recordar lo que
+					estaba haciendo anteriormente a la ejecución del método, recoger el resultado y
+					actuar en consecuencia.</para>
+				<db:para>Sin embargo, en el modelo de actores las cosas se vuelven un poco más
+					complicadas. Cuando un actor realiza una petición a otro actor el primero de
+					ellos no es consciente del tiempo que tardará la respuesta, instantes en los que
+					dicho actor no debería bloquearse, sino que debería continuar ejecutando otro
+					trabajo hasta que la respuesta a su petición le sea enviada. ¿Puede el actor
+					recordar qué estaba haciendo en el momento en el que envió la petición
+					inicial?</db:para>
+				<db:para>Podríamos adoptar dos soluciones para intetar resolver el problema
+					planteado en el párrafo anterior:<itemizedlist>
+						<listitem>
+							<para>Un mecanismo para simplificar la lógica de los actores sería
+								incluir información redundante en los mensajes. Si la petición es un
+								objeto inmutable, el coste de incluir una referencia a la solicitud
+								en el valor de retorno no sería costoso.</para>
+						</listitem>
+						<listitem>
+							<para>Otro mecanismo adicional que nos permitiría incrementar la
+								redundancia en los mensajes sería la utilización de una clase
+								diferente para cada uno de las clases de mensajes que
+								dispongamos</para>
+						</listitem>
+					</itemizedlist></db:para>
+			</section>
+		</section>
+	</section>
+	<section xml:id="producers-example" xreflabel="Ejemplo completo de actores">
+		<title>Un ejemplo completo</title>
+		<para>Como ejemplo completo de aplicación del modelo de actores descrito a lo largo de las
+			secciones anteriores y con el objetivo de asentar y poner en marcha los conocimientos
+			adquiridos vamos a construir, paso a paso, una pequeña aplicación de ejemplo.</para>
+		<section>
+			<title>Especificación del problema</title>
+			<para>Durante la construcción de este ejemplo desarrollaremos una abstraccción de <emphasis
+					role="italic">producers</emphasis> la cual ofrecerá una interfaz de iterador
+				estándar para la recuperación de una secuencia de valores.</para>
+			<db:para>La definición de un <emphasis role="italic">producer</emphasis> específico se realiza
+				mediante la implementación del método abstracto <emphasis role="italic"
+					>produceValues</emphasis>. Los valores individuales son generados utilizados el
+				método <emphasis role="italic">produce</emphasis>. Por ejemplo, un <emphasis
+					role="italic">producer</emphasis> que genera en preorden los valores contenidos
+				en un árbol podría ser definido como:
+				<programlisting>class TraversePreorder(n:Tree) 
+				extends Producer[int]{
+	def produceValues = traverse(n)
+	
+	def traverse(n:Tree){
+		if( n!= null){
+			produce(n.elem)
+			traverse(n.left)
+			traverse(n.right)
+		}
+	}
+}</programlisting></db:para>
+		</section>
+		<section>
+			<title>Implementación del <emphasis role="italic">producer</emphasis> y <emphasis role="italic"
+					>coordinator</emphasis></title>
+			<para>La abstracción <emphasis role="italic">producer</emphasis> se implementa en base a dos
+				actores: un actor productor y un actor coordinador. El siguiente fragmento de código
+				ilustra cómo podríamos llevar a cabo la definición del actor productor:
+				<programlisting>abstract class Producer[T] {
+   
+	protected def produceValues: unit
+	
+	protected def produce(x: T) {
+    	coordinator ! Some(x)
+    	receive { case Next => }
+	}
+	
+	private val producer: Actor = actor {
+    	receive {
+      	case Next =>
+        	produceValues
+        	coordinator ! None
+    	}
+	}
+	...
+}</programlisting>
+				¿Cuál es el mecanismo de funcionamiento del actor productor anterior? Cuando un
+				actor productor recibe el mensaje <emphasis role="italic">Next</emphasis> éste
+				ejecuta el método (abstracto) <emphasis role="italic">produceValues</emphasis>, que
+				desencadena la ejecución del método <emphasis role="italic">produce</emphasis>. Ésta
+				ultima ejecución provoca el envío de una serie de valores (recubiertos por el
+				message <emphasis role="italic">Some</emphasis>) al coordinador.</para>
+			<db:para>El coordinador es el responsable de sincronizar las peticiones de los clientes y los
+				valores provenientes del productor. Una posible implementación del actor coordinador
+				se ilustra en el siguiente fragmento de código:
+				<programlisting>private val coordinator:Actor = actor {
+	loop {
+		react {
+			case Next =>
+				producer ! Next
+				reply{
+					receive {case x: Option[_] => x}
+				}
+			case Stop => exit('stop)
+		}
+	}
+}</programlisting>
+			</db:para>
+		</section>
+		<section>
+			<title>Interfaz <emphasis role="italic">iterator</emphasis></title>
+			<para>Nuestro objetivo es que los <emphasis role="italic">producers</emphasis> se puedan
+				utilizar del mismo modo en que utilizamos los iteradores tradicionales. Nótese como
+				los métodos <emphasis role="italic">hasNext</emphasis> y <emphasis role="italic"
+					>next</emphasis> envían sendos mensajes al actor coordinador para llevar a cabo
+				su tarea:
+				<programlisting>def iterator = new Iterator[T] {
+
+	private var current: Any = Undefined
+	
+	private def lookAhead = {
+		if(current == Undefined)
+			current = coordinator !? Next
+		current
+	}
+
+	def hasNext: boolean = lookAhead match {
+		case Some(x) => true
+		case None => { coordinator ! Stop; false}
+	}
+	
+	def next:T = lookAhead match{
+		case Some(x) => current = Undefined; x.asInstanceOf[T]
+	}
+}</programlisting>
+				Centremos nuestra atención en el método <emphasis role="italic"
+				>lookAhead</emphasis>. Cuando el atributo <emphasis role="italic">current</emphasis>
+				tenga un valor indefinido significa que tendremos que recuperar el siguiente valor.
+				Para llevar a cabo dicha tarea se hace uso del operador de envío de mensajes
+				síncronos <emphasis role="italic"><emphasis role="bold">!?</emphasis></emphasis> lo
+				cual implica que se queda a la espera de la respuesta del coordinador. Los mensajes
+				enviados mediante el operador <emphasis role="italic"><emphasis role="bold"
+						>!?</emphasis></emphasis> debe ser respondidos mediante el uso de <emphasis
+					role="italic">reply</emphasis>.</para>
+			<db:para>En el apéndice <xref linkend="apendix-producers"/> se puede ver código completo del
+				ejemplo descrito durante esta sección.</db:para> </section>
+	</section>
+</chapter>
