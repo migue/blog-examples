@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title>Conclusiones y trabajo futuro</title>
+	<para>Como punto final de este trabajo haremos un breve resumen de los conceptos analizados durante
+		todo el trabajo y plantearemos futuras líneas de trabajo que podrían resultar atractivas
+		para aquellas personas interesadas en esta temática.</para>
+	<section>
+		<title>Conclusiones</title>
+		<para>Durante el desarrollo de este trabajo hemos vistos algunas de las principales
+			características del lenguaje <emphasis role="italic">Scala</emphasis>, haciendo espacial
+			hincapié en cómo se integran las capacidades del paradigma de orientación a objetos y el
+			funcional. Asimismo hemos analizado el modelo de concurrencia basado en actores y cómo
+				<emphasis role="italic">Scala</emphasis> ofrece dicho modelo de computación mediante
+			una librería que complementa al lenguaje.</para>
+		<db:para>Como ya hemos indicado al inicio del trabajo <emphasis role="italic">Scala</emphasis> es
+			el primer <emphasis role="bold">lenguaje de propósito general</emphasis> que integra
+			conceptos del paradigma funcional y el orientado a objetos. Muchos de los lectores se
+			estarán preguntando cuál es el ámbito de aplicación del lenguaje. La respuesta corta y
+			concisa podría ser: en todos aquellos lugares donde utilizamos <emphasis role="italic"
+				>Java</emphasis>. Entrando un poco más en detalle en las posibles escenarios de
+			aplicación a continuación se indican algunos de los posibles usos:<itemizedlist>
+				<listitem>
+					<para>Lenguaje de parte servidora.</para>
+				</listitem>
+				<listitem>
+					<para>Escritura de scripts</para>
+				</listitem>
+				<listitem>
+					<para>Desarrollo de aplicaciones robustas, escalables y fiables.</para>
+				</listitem>
+				<listitem>
+					<para>Desarrollo de aplicaciones web.</para>
+				</listitem>
+				<listitem>
+					<para>Construcción de lenguajes de dominio específico (DSL)</para>
+				</listitem>
+				<listitem>
+					<para>. . .</para>
+				</listitem>
+			</itemizedlist></db:para>
+	</section>
+	<section>
+		<title>Líneas de trabajo</title>
+		<para>Por motivos de espacio y, principalmente, de tiempo se han quedado numerosos temas en el
+			tintero que podrían resultar interesantes. A continuación se listan y describen, de
+			manera sumamente breve, algunas sugerencias consideradas interesantes:<itemizedlist>
+				<listitem>
+					<para>Análisis de la plataforma <emphasis role="italic"><link
+								xlink:href="http://akka.io">Akka</link></emphasis> . Plataforma
+						basada en <emphasis role="italic">Scala</emphasis> que ofrece un modelo de
+						actores junto  con <emphasis role="italic">Sofware Transactional
+							Memory</emphasis> con el objetivo de proporcionar los fundamentos
+						correctos para la construcción de aplicaciones escalables y
+						concurrentes.</para>
+					<db:para>Una comparación entre el modelo de actores ofrecido por <emphasis
+							role="italic">Scala</emphasis> y el modelo de actores ofrecido por
+							<emphasis role="italic">Akka</emphasis> podría resultar
+						atractiva.</db:para>
+				</listitem>
+				<listitem>
+					<para><emphasis role="italic">Web</emphasis> funcional. Análisis de cómo las
+						características de los lenguajes funcionales se pueden utilizar para
+						construir aplicaciones web. Análisis de frameworks web funcionales como
+							<link xlink:href="http://www.liftweb.net/">Lift</link> o <link
+							xlink:href="http://www.playframework.org/">Play</link>
+					</para>
+				</listitem>
+				<listitem>
+					<para>Análisis de interoperabilidad de <emphasis role="italic">Scala</emphasis>
+						y <emphasis role="italic">Java</emphasis>. Mecanismos y modos de interacción
+						entre ambos lenguajes. Problemática habitual.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis role="italic">Scala</emphasis> en <emphasis role="italic"
+							>.NET</emphasis>. </para>
+				</listitem>
+				<listitem>
+					<para><emphasis role="italic">Colecciones</emphasis>. Análisis del nuevo API de
+						colecciones diseñado a partir de <emphasis role="italic">Scala
+							2.8</emphasis>. Análisis de colecciones concurrentes.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis role="italic">GUI</emphasis> en <emphasis role="italic"
+							>Scala</emphasis>. Análisis de cómo podemos utilizar <emphasis
+							role="italic">Scala</emphasis> para la construcción de aplicaciones de
+						escritorio.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis role="italic">Monads</emphasis> en <emphasis role="italic"
+							>Scala</emphasis>.</para>
+				</listitem>
+				<listitem>
+					<para>Arquitectura del compilador de <emphasis role="italic">Scala</emphasis>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>Lenguajes de dominio específicos (<emphasis role="italic"
+						>DSLs</emphasis>). Construcción de lenguajes de dominio específicos basados
+						en el lenguaje <emphasis role="italic">Scala</emphasis>. <emphasis
+							role="italic">Combinator parsing</emphasis>.</para>
+				</listitem>
+			</itemizedlist></para>
+	</section>
+</chapter>
