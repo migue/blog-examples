@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rng" type="xml"?>
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+  
+    <info>
+        <title><emphasis role="italic">Scala</emphasis>: Un lenguaje escalable para la <emphasis
+                role="italic">JVM</emphasis>            
+        </title>
+        <author>
+            <personname>Miguel Pastor</personname>
+            <address>
+                <city>Madrid</city>
+                <street>Calle Suecia 32 6B</street>
+                <postcode>28028</postcode>
+                <country>Spain</country>
+            </address>
+            <email>miguelinlas3@gmail.com</email>
+        </author>
+        <cover>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="scala-logo.png" align="center"></imagedata>
+                </imageobject>
+            </mediaobject>
+        </cover>
+    </info>
+    
+    
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="intro/intro.xml"/>    
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="fundamentals/fundamentals.xml"/>      
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="actors/actors.xml"/> 
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="conclusions/conclusions.xml"/>        
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="apendix/apendix-one.xml"></xi:include>
+        <!-- <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="apendix/apendix-two.xml"></xi:include> -->
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="apendix/apendix-three.xml"></xi:include>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="references/references.xml"></xi:include>       
+</book>
