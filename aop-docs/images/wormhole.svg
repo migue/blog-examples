@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created by diasvg.py -->
+<svg width="26.678cm" height="16.172cm" viewBox="0.205 -1.968 26.883 14.205"
+ xmlns="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="10.420,1.500 10.920,1.000 20.170,1.000 20.170,2.800 19.670,3.300 10.420,3.300 10.420,1.500 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="10.420,1.500 10.920,1.000 20.170,1.000 20.170,2.800 19.670,3.300 10.420,3.300 10.420,1.500 "/>
+<line x1="10.420" y1="1.500" x2="19.670" y2="1.500" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="1.500" x2="20.170" y2="1.000" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="1.500" x2="19.670" y2="3.300" stroke="#000000" stroke-width="0.100" />
+<line x1="10.920" y1="2.800" x2="10.920" y2="2.800" stroke="#000000" stroke-width="0.050" />
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="10.420,4.755 10.920,4.255 20.170,4.255 20.170,6.055 19.670,6.555 10.420,6.555 10.420,4.755 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="10.420,4.755 10.920,4.255 20.170,4.255 20.170,6.055 19.670,6.555 10.420,6.555 10.420,4.755 "/>
+<line x1="10.420" y1="4.755" x2="19.670" y2="4.755" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="4.755" x2="20.170" y2="4.255" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="4.755" x2="19.670" y2="6.555" stroke="#000000" stroke-width="0.100" />
+<line x1="10.920" y1="6.055" x2="10.920" y2="6.055" stroke="#000000" stroke-width="0.050" />
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="10.420,8.210 10.920,7.710 20.170,7.710 20.170,9.510 19.670,10.010 10.420,10.010 10.420,8.210 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="10.420,8.210 10.920,7.710 20.170,7.710 20.170,9.510 19.670,10.010 10.420,10.010 10.420,8.210 "/>
+<line x1="10.420" y1="8.210" x2="19.670" y2="8.210" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="8.210" x2="20.170" y2="7.710" stroke="#000000" stroke-width="0.100" />
+<line x1="19.670" y1="8.210" x2="19.670" y2="10.010" stroke="#000000" stroke-width="0.100" />
+<line x1="10.920" y1="9.510" x2="10.920" y2="9.510" stroke="#000000" stroke-width="0.050" />
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="10.285,12.355 10.785,11.855 20.035,11.855 20.035,13.655 19.535,14.155 10.285,14.155 10.285,12.355 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="10.285,12.355 10.785,11.855 20.035,11.855 20.035,13.655 19.535,14.155 10.285,14.155 10.285,12.355 "/>
+<line x1="10.285" y1="12.355" x2="19.535" y2="12.355" stroke="#000000" stroke-width="0.100" />
+<line x1="19.535" y1="12.355" x2="20.035" y2="11.855" stroke="#000000" stroke-width="0.100" />
+<line x1="19.535" y1="12.355" x2="19.535" y2="14.155" stroke="#000000" stroke-width="0.100" />
+<line x1="10.785" y1="13.655" x2="10.785" y2="13.655" stroke="#000000" stroke-width="0.050" />
+<line x1="21.550" y1="13.325" x2="21.598" y2="2.062" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="21.600,1.687 21.847,2.188 21.598,2.062 21.347,2.186 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="21.600,1.687 21.847,2.188 21.598,2.062 21.347,2.186 "/>
+<text x="22.050" y="1.425"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+Llamado</text>
+<text x="22.185" y="13.262"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+Llamante</text>
+<text x="22.120" y="7.357"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+Pila de llamadas</text>
+<text x="0.205" y="8.003"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+Contexto en cada </text>
+<text x="0.205" y="8.803"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+uno de los niveles</text>
+<text x="11.345" y="2.400"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="11.845" y="5.905"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="15.045" y="2.400"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="13.095" y="2.500"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="13.740" y="5.897"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="18.495" y="5.905"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="11.395" y="9.310"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="14.795" y="9.283"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="11.080" y="13.627"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<text x="18.010" y="13.655"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<line x1="11.800" y1="11.675" x2="11.834" y2="10.612" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.846,10.237 12.080,10.745 11.834,10.612 11.580,10.728 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.846,10.237 12.080,10.745 11.834,10.612 11.580,10.728 "/>
+<line x1="11.886" y1="7.986" x2="11.921" y2="6.923" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.933,6.548 12.167,7.056 11.921,6.923 11.667,7.040 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.933,6.548 12.167,7.056 11.921,6.923 11.667,7.040 "/>
+<line x1="11.871" y1="4.681" x2="11.906" y2="3.618" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.918,3.243 12.152,3.751 11.906,3.618 11.652,3.735 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.918,3.243 12.152,3.751 11.906,3.618 11.652,3.735 "/>
+<line x1="5.606" y1="7.576" x2="10.887" y2="2.850" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.167,2.600 10.961,3.119 10.887,2.850 10.627,2.747 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.167,2.600 10.961,3.119 10.887,2.850 10.627,2.747 "/>
+<line x1="6.941" y1="8.371" x2="11.212" y2="6.288" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.550,6.124 11.210,6.568 11.212,6.288 10.991,6.118 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.550,6.124 11.210,6.568 11.212,6.288 10.991,6.118 "/>
+<line x1="6.650" y1="8.925" x2="10.513" y2="8.969" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="10.888,8.974 10.385,9.218 10.513,8.969 10.391,8.718 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="10.888,8.974 10.385,9.218 10.513,8.969 10.391,8.718 "/>
+<line x1="5.336" y1="9.271" x2="10.698" y2="12.926" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.008,13.137 10.454,13.062 10.698,12.926 10.735,12.649 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.008,13.137 10.454,13.062 10.698,12.926 10.735,12.649 "/>
+<text x="17.385" y="2.513"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+X</text>
+<line x1="17.592" y1="2.798" x2="17.695" y2="12.488" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="17.699,12.863 17.444,12.366 17.695,12.488 17.943,12.361 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="17.699,12.863 17.444,12.366 17.695,12.488 17.943,12.361 "/>
+<text x="20.200" y="-1.425"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+wormhole</text>
+<line x1="19.800" y1="-1.113" x2="17.930" y2="3.585" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="17.791,3.934 17.744,3.377 17.930,3.585 18.209,3.562 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="17.791,3.934 17.744,3.377 17.930,3.585 18.209,3.562 "/>
+</svg>
