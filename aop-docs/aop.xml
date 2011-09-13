@@ -1,0 +1,2865 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+	<title>Programación orientada a aspectos (<emphasis role="italic">AOP</emphasis>)</title>
+	<section>
+		<title>Motivaciones</title>
+		<para>Antes de profundizar en la temática propia de la orientación a aspectos y sus
+			aplicaciones en el mundo real, sería conveniente describir las motivaciones principales
+			que han ocasionado la escritura de este capítulo de la memoria.</para>
+		<para>La primera de ellas ha sido la intención de introducir al lector en algunas de las
+			técnicas de desarrollo avanzadas utilizadas en la actualidad por los equipos de
+			desarrollo de software más vanguardistas. La segunda está relacionada con el desarrollo
+			de nuevas herramientas de programación y, por ende, con la herramienta desarrollada como
+			ejemplo de este proyecto: <emphasis role="italic">R-Eclipse</emphasis>. Si el lector
+			desconoce muchos de los términos definidos en esta sección no se preocupe, a lo largo
+			del capítulo comprenderá la terminología aquí utilizada.</para>
+		<para>En los últimos años han surgido muchos lenguajes similares a <emphasis role="italic"
+				>Java</emphasis> que se ejecutan sobre la propia máquina virtual de este último
+				(<emphasis role="italic">JVM</emphasis>), lo cual es un indicador bastante fiable
+			del futuro del desarrollo de aplicaciones sobre la plataforma <emphasis role="italic"
+				>Java</emphasis>.<footnote><para><emphasis role="italic">R Eclipse</emphasis> no ha
+					utilizado el enfoque descrito en esta sección por dos motivos principalmente; el
+					primero de ellos es que <emphasis role="italic">R</emphasis> no es un lenguaje
+					similar a <emphasis role="italic">Java</emphasis> ni corre bajo su máquina
+					virtual. El segundo de ellos consiste en que el <emphasis role="italic"
+						>framework</emphasis> base de desarrollo, <emphasis role="italic"
+						>DLTK</emphasis>, no utiliza la arquitectura descrita en estas
+					líneas.</para></footnote>Sin embargo, <emphasis role="italic">Eclipse</emphasis>
+			y su solución <emphasis role="italic">JDT</emphasis>, no ofrecen soporte para la
+			integración de estos nuevos lenguajes en su modelo <emphasis role="italic"
+				>Java</emphasis> subyacente. Por ejemplo, no existe un modo de incluir jerarquías de
+			tipos, jerarquías de llamadas, etc.</para>
+		<para>
+			<figure>
+				<title>Herramientas para nuevos lenguajes</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/AOPExtensionTooling-ok.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</para>
+		<para>Algunos de los problemas que se encuentran los ingenieros de software cuando intentan
+			construir herramientas para algunos de los lenguajes descritos anteriormente
+						son:<itemizedlist><listitem><para>Necesidad de acoplarse al modelo ofrecido
+						por <emphasis role="italic">JDT</emphasis>. No se
+						puede.</para></listitem><listitem><para>Necesidad de acoplarse al motor de
+						indexación de código fuente. No se
+						puede.</para></listitem><listitem><para>Necesidad de acoplarse al <emphasis
+							role="italic">parser</emphasis> de <emphasis role="italic"
+							>JDT</emphasis>. No se puede.</para></listitem></itemizedlist></para>
+		<para>Una aproximación utilizada por muchos entornos de desarrollo de lenguajes actuales
+			como pueden ser <emphasis role="italic">Scala</emphasis> o <emphasis role="italic"
+				>Groovy</emphasis> es la utilización del servicio de tejido de <emphasis
+				role="italic">JDT</emphasis>. Las características principales
+						son:<itemizedlist><listitem><para>Utiliza <emphasis role="italic"
+							>AspectJ</emphasis> añadiendo puntos de unión al modelo <emphasis
+							role="italic">JDT</emphasis>.</para></listitem><listitem><para>Se
+						encapsula en puntos de extensión de <emphasis role="italic"
+							>Eclipse</emphasis>, haciéndolo extensible a terceras
+					partes.</para></listitem><listitem><para>Utiliza un proyecto de <emphasis
+							role="italic">Eclipse</emphasis> conocido como <emphasis role="italic"
+							>Equinox Aspects</emphasis> que soporta el proceso de tejido en tiempo
+						de carga en un entorno <emphasis role="italic"
+					>OSGI</emphasis>.</para></listitem></itemizedlist></para>
+		<para>El siguiente gráfico ilustra cómo funciona el proceso anterior:</para>
+		<para>
+			<figure>
+				<title>Proceso de acoplamiento al JDT</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/EquinoxTooling-ok.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</para>
+		<para>A lo largo de las siguentes secciones se introducirá la terminología <emphasis
+				role="italic">AOP</emphasis> así como la definición de sus elementos más
+			relevantes.</para>
+	</section>
+	<section>
+		<title>Evolución de las metodologías de programación </title>
+		<para>La ingeniería del software ha recorrido un largo camino desde sus inicios: desde el
+			código máquina hasta la orientación a objetos pasando por los lenguajes procedimentales.
+			Analizando de manera somera la evolución de las metodologías de programación observamos
+			cómo el modelo procedimental introdujo la abstracción funcional y la orientación a
+			objetos los conceptos de composición, reutilización y encapsulación. Este último
+			paradigma ha sido, posiblemente, una de las mayores contribuciones al mundo del software
+			durante toda su historia y, en la actualidad, es el paradigma de programación utilizado
+			en la mayor parte de los grandes desarrollos de software.</para>
+		<para>Entre todas las ventajas del paradigma de orientación a objetos, en el párrafo
+			anterior se destacaba, no al azar, la reutilización y la encapsulación pero . . .
+			¿siempre es posible ubicar en el mismo lugar todas las tareas relacionadas con una misma
+			función?, ¿en alguna ocasión has visto un fragmento de código que no encaja en ninguna
+			clase en particular?.</para>
+		<para>Imaginemos un sistema en el que determinadas operaciones necesitan llevar a cabo una
+			gestión de transacciones. Resultaría sumamente complicado, por no decir imposible,
+			modularizar todos los conceptos necesarios en un sistema transaccional: inicialización,
+			comunicación con el manager de transacciones, rollbacks, . . . Esto es debido a que
+			todos los métodos de un objeto que requieren un control de transacciones necesitan ser
+			conscientes que la operación a realizar se ejecuta bajo un control transaccional, para
+			comportarse de manera acorde al funcionamiento requerido. Resumiendo, el código
+			encargado de la gestión de transacciones estaría ubicado en cada uno de los objetos que
+			lo necesite. La solución comúnmente adoptada a este problema es copiar y pegar el código
+			en todas aquellas partes en las que es necesario, resultando evidente, que dicha
+			solución no permite disponer de una buena modularización y dificulta las labores de
+			mantenimiento y evolución del código. Este fenómeno es conocido como
+				<emphasis>scattering</emphasis> , puesto que el código relacionado con un mismo
+			asunto se encuentra repartido a lo largo de todo el sistema. </para>
+		<para>Sumemos, además, que los módulos que contienen código relativo a muchos asuntos
+			diferentes tienden a ser, en general, menos reutilizables. El fenómeno en el que
+			diferentes asuntos son entremezclados en el código se conoce como
+				<emphasis>tangling</emphasis> . </para>
+		<para>La problemática introducida en los párrafos anteriores, <emphasis>tangling</emphasis>
+			y <emphasis>scattering</emphasis> , afecta al diseño y desarrollo de software de muchas
+			y diferentes maneras. Veamos alguna de las principales: </para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					<emphasis role="bold">Trazabilidad reducida.</emphasis> La implementación de
+					diferentes conceptos en un mismo lugar dificulta el proceso de establecimiento
+					de una relación entre los requisitos y su implementación y viceversa. Así por
+					ejemplo, para completar la trazabilidad del requerimiento de autenticación
+					podríamos llegar a examinar todos los módulos del sistema. </para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="bold">Baja productividad.</emphasis> Varios conceptos no
+					relacionados que han sido implementados en un mismo lugar ocasiona que la
+					atención se disperse a lo largo de todos ellos. La falta de un objetivo concreto
+					provoca que los desarrolladores se vean obligados a manejar diferentes conceptos
+					no relacionados con el objetivo principal. En muchas ocasiones, la construcción
+					de un módulo implicará la participación de diversos desarrolladores, con
+					diferentes perfiles, o que el desarrollador tenga conocimiento en todos los
+					ámbitos que se están incluyendo en el nuevo módulo. </para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="bold">Escasa reutilización del código.</emphasis> Los conceptos
+					implementados en un módulo podrían ser requeridos por otros módulos con
+					funcionalidades similares.</para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="bold">Baja calidad.</emphasis> El <emphasis>code
+						tangling</emphasis> provoca que el código sea más difícil de leer, de ubicar
+					los potenciales problemas y de hacer revisiones del mismo. Por ejemplo, la
+					revisión de código de un módulo en el que se implementan diversos conceptos
+					requerirá la presencia de expertos en cada uno de ellos. A menudo muchos de
+					estos expertos no estarán disponibles de manera simultánea, y el resto no
+					prestará demasiada atención en los temas que se encuentren fuera de su área de
+					conocimiento. </para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="bold">Dificultad para llevar a cabo evoluciones.</emphasis> La
+					falta de recursos o una visión incompleta derivan en un diseño que maneja
+					únicamente los conceptos actuales. Cuando aparezcan nuevos requerimientos, a
+					menudo, nos veremos obligados a reimplementar. Dado que la implementación no se
+					encuentra modularizada, la inclusión de un nuevo requerimiento podría obligar a
+					realizar cambios en todos los módulos. </para>
+			</listitem>
+		</itemizedlist>
+		<para>Los problemas descritos en los puntos anteriores han servido como impulso en la
+			búsqueda de nuevos y mejores enfoques en la arquitectura, diseño e implementación.
+				<emphasis role="italic">AOP</emphasis> ofrece una solución a todos los problemas
+			anteriores.</para>
+	</section>
+	<section>
+		<title><emphasis role="italic">AOP</emphasis> en el mundo real</title>
+		<para>¿Qué lugar ocupa la orientación a aspectos en el mundo real? ¿Deberíamos prestarle
+			atención o ignorarlo por completo? ¿Cuáles son los beneficios aportados? ¿y los posibles
+			riesgos de adopción de esta tecnología?. Éstas y otras preguntas serán respondidas,
+			desde un punto de vista práctico, en los siguientes subapartados de esta sección.</para>
+		<section>
+			<title>Hype Cycle</title>
+			<para><emphasis role="italic">Hype Cycle</emphasis> es una representación gráfica del
+				grado de madurez, adopción y aplicación en el mundo real de una tecnología
+				determinada. Es importante comprender bien el gráfico anterior, y la posición de la
+				tecnología que se está considerando, en este caso <emphasis role="italic"
+					>AOP</emphasis>, puesto que se dispondrá de una visión mucho más ajustada de los
+				riesgos y beneficios a los que nos estamos exponiendo.</para>
+			<para>
+				<figure>
+					<title>Gráfico del ciclo <emphasis role="italic">Hype</emphasis></title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/Gartner_Hype_Cycle.svg" width="400"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+			</para>
+			<para>La interpretación de la curva <emphasis role="italic">Hype Cicle</emphasis>
+				implica cinco fases diferentes las cuales analizaremos a continuación,
+				relacionándolas evidentemente, con <emphasis role="italic">AOP</emphasis>.</para>
+			<section>
+				<title>Activación de la tecnología</title>
+				<para>Este es el momento en el que la tecnología aparece con la intención/promesa de
+					solucionar un conjunto determinado de problemas. Podría ser el anuncio de un
+					nuevo producto o la liberación de una nueva versión de un producto ya
+					existente.</para>
+				<para>En el caso de <emphasis role="italic">AOP</emphasis>, este proceso de
+					activación se produjo en 2002 con el lanzamiento de <emphasis role="italic"
+						>AspectJ 1.0</emphasis>, seguido de una liberación mucho más <emphasis
+						role="italic">importante</emphasis> (AspectJ 1.1) en el año 2003. Mucha
+					gente se dio cuenta del potencial de <emphasis role="italic">AspectJ</emphasis>,
+					especialmente su utilización en aplicaciones empresariales.</para>
+			</section>
+			<section>
+				<title>Expectativas irreales ("<emphasis role="italic">peak</emphasis>")</title>
+				<para>Durante esta fase la tecnología se hace muy popular. Todo el mundo quiere
+					conocerla y tiene una opinión sobre ella aunque muy poca gente la utiliza en
+					aplicaciones reales.</para>
+				<para>Durante el año 2004 la mayoría de desarrolladores que trabajaban en <emphasis
+						role="italic">AspectJ</emphasis> y <emphasis role="italic">AspectJ
+						Development Tools</emphasis> (<emphasis role="italic">AJDT</emphasis>) eran
+					integrantes de IBM. Esta inversión por parte de IBM proporcionó una base sólida
+					a <emphasis role="italic">AspectJ</emphasis>.</para>
+				<para>La ausencia de una adopción masiva hizo que el uso de la tecnología se
+					convirtiese en una auténtica aventura. Afortunadamente para <emphasis
+						role="italic">AspectJ</emphasis> el pico en esta fase no fue demasiado
+					elevado, principalmente gracias al manejo de las expectativas que realizaron sus
+					principales <emphasis role="italic">evangelistas</emphasis>. Esta gestión
+					provocó un pico más bajo en el <emphasis role="italic">hype cycle</emphasis>, lo
+					que supuso una caída mucho menor en la siguiente fase.</para>
+			</section>
+			<section>
+				<title>Desilusión</title>
+				<para>Esta es la fase de ciclo <emphasis role="italic">Hype</emphasis> en la que la
+					tecnología comienza a perder toda la atención que se le había prestado hasta el
+					momento. </para>
+				<para>Mientras que los equipos que la adoptaron desde sus inicios continúan
+					utilizándola con el objetivo de obtener una ventaja competitiva, muchos otros
+					comienzan a observarla con cierto escepticismo. Nuevas tecnologías aparecen en
+					escena aportando soluciones diferentes al mismo problema. Resulta interesante
+					destacar que muchos de estos nuevos competidores están en la fase de "<emphasis
+						role="italic">expectativas irreales</emphasis>".</para>
+				<para><emphasis role="italic">AOP</emphasis> atravesó esta fase durante 2006
+					aproximadamente. Enterprise Java Beans ofrecía una seria competencia,
+					permitiendo implementar funcionalidades transversales como seguridad o
+					transaccionalidad de una manera modular. Pero <emphasis role="italic"
+						>EJB</emphasis> no era el único competidor, y tampoco el más importante. La
+					aparición de lenguajes dinámicos como <emphasis role="italic">Groovy</emphasis>
+					o <emphasis role="italic">Ruby</emphasis> y sus frameworks asociados, <emphasis
+						role="italic">Grails</emphasis> y <emphasis role="italic">Rails</emphasis>,
+					supuso una dura competencia para <emphasis role="italic">AOP</emphasis>. El
+					modelo de metaprogramación del que disponen estas tecnologías facilitaba una
+					nueva solución para realizar la modularización de funciones transversales.
+				</para>
+			</section>
+			<section>
+				<title>Viendo la luz</title>
+				<para>Numerosos factores intervienen en el desarrollo de esta fase: maduración de la
+					tecnología, cambios en la misma para acercarse a la realidad, búsqueda de un
+					contexto de uso en el que realmente se cause impacto o la "<emphasis
+						role="italic">desilusión</emphasis>" con otras alternativas, que en su
+					momento fueron competidores, son algunas de ellas.</para>
+				<para>En el caso de <emphasis role="italic">AOP</emphasis>, el comienzo de esta fase
+					se produjo cuando algunos de los líderes del proyecto abandonaron IBM para
+					fichar por <emphasis role="italic">SpringSource</emphasis>:Adrian Colyer, Andy
+					Clement, Andrew Eisinberg, . . . , convirtiendo a <emphasis role="italic"
+						>AspectJ</emphasis> en un proyecto más del portfolio de <emphasis
+						role="italic">Spring</emphasis>. Analicemos los factores enumerados
+									anteriormente:<itemizedlist><listitem><para><emphasis
+									role="bold">Acercamiento a la realidad</emphasis>: La
+								introducción de anotaciones en <emphasis role="italic">Java
+									5</emphasis>, los cambios en la sintaxis o la supresión del
+								proceso de <emphasis role="italic">weaving</emphasis> si se utiliza
+								conjuntamente con <emphasis role="italic">Spring</emphasis> fueron
+								algunos de los cambios realizados. La mejora en las herramientas de
+								desarrollo fue otra de las respuestas a las necesidades reales de
+								los usuarios.</para></listitem><listitem><para><emphasis role="bold"
+									>Contexto de utilización: la influencia de Spring</emphasis>: En
+								sus inicios <emphasis role="italic">AspectJ</emphasis> carecía de un
+								contexto de utilización definido (<emphasis role="italic"
+									>C</emphasis> nació en el ámbito de los sistemas operativos,
+									<emphasis role="italic">C++</emphasis> en el contexto de
+								interfaz de usuario, etc). Ha sido <emphasis role="italic"
+									>Spring</emphasis> la que le ha proporcionado a <emphasis
+									role="italic">AspectJ</emphasis> un contexto de uso bien
+								definido: las aplicaciones
+									empresariales.</para></listitem><listitem><para><emphasis
+									role="bold">Desilusión con los competidores</emphasis>:
+								Anteriormente indicamos que <emphasis role="italic">EJB</emphasis>
+								permitía modularizar los conceptos transversales de un sistema. Los
+								desarrolladores se dieron cuenta de que la solución ofrecida era
+								demasiado pesada en la mayoría de las ocasiones. La versión 3 de
+									<emphasis role="italic">EJB</emphasis> introdujo interceptores,
+								un concepto similar a los <emphasis role="italic">advices</emphasis>
+								de <emphasis role="italic">AspectJ</emphasis>, aunque carecían de un
+								modelo de unión.</para><para>Los lenguajes dinámicos ofrecen una
+								gran alternativa a <emphasis role="italic">AspectJ</emphasis> aunque
+								son relativamente nuevos. Tendremos que esperar el paso del tiempo y
+								el uso en grandes aplicaciones empresariales para determinar la
+								evolución de los mismos, además de observar la evolución de
+									<emphasis role="italic"
+						>AspectJ</emphasis>.</para></listitem></itemizedlist></para>
+			</section>
+			<section>
+				<title>Plena productividad</title>
+				<para>Es la última fase definida en el ciclo <emphasis role="italic"
+					>Hype</emphasis>. En esta situación la tecnología está ampliamente difundida y
+					se utiliza en la solución de problemas para los que ofrece una gran respuesta.
+					Será en esta fase cuando se produzca una aceptación masiva de la
+					tecnología.</para>
+				<para>En la actualidad, <emphasis role="italic">Java o C</emphasis> , se encuentran
+					en esta fase. <emphasis role="italic">AOP</emphasis> y <emphasis role="italic"
+						>AspectJ</emphasis> deberán alcanzar este nivel con el paso del
+					tiempo.</para>
+			</section>
+		</section>
+		<section>
+			<title>¿Dónde se utiliza <emphasis role="italic">AOP</emphasis>?</title>
+			<para>A continuación se analizarán algunos de los principales ámbitos de aplicación de
+				AOP.</para>
+			<section>
+				<title>Aplicaciones empresariales</title>
+				<para>Gestión de transacciones, seguridad, auditoría, monitorización, gestión de la
+					concurrencia, manejo de errores y un largo etcétera son funcionalidades
+					transversales en la mayoría de aplicaciones empresariales.</para>
+				<para>Aquellas aplicaciones que usen <emphasis role="italic">Spring</emphasis> como
+					base de su arquitectura ya estarán utilizando algunos de los aspectos que vienen
+					facilitados por el framework. Gracias a las anotaciones, concretamente <emphasis
+						role="italic">@Aspect</emphasis>, la construcción de aspectos se ha
+					convertido en una tarea habitual.</para>
+			</section>
+			<section>
+				<title>Web y servidores de aplicaciones</title>
+				<para>Aplicación de políticas, FFDC, recolección de contextos, trazabilidad o
+					monitorización son algunas de las funcionalidades basadas en <emphasis
+						role="italic">AOP</emphasis> que podemos encontrar en los servidores de
+					aplicaciones. <emphasis role="italic">Spring Source DM Server y TC
+						Server</emphasis> son un claro ejemplo de estas funcionalidades.</para>
+			</section>
+			<section>
+				<title>Frameworks</title>
+				<para>Gestión de transacciones y seguridad son habitualmente implementadas mediante
+					aspectos. Asimismo, otras utilizaciones de los aspectos podría ser la inyección
+					de dependencias en objetos de dominio. Para obtener un amplio abanico de
+					posibilidades de uso de los aspectos, el lector podría visitar los proyectos de
+						<emphasis role="italic">Spring Roo</emphasis> o <emphasis role="italic"
+						>Apache Magma</emphasis>.</para>
+			</section>
+			<section>
+				<title>Herramientas de monitorización</title>
+				<para>El uso de aspectos facilita también la construcción de herramientas de
+					monitorización. Muchas herramientas utilizan <emphasis role="italic"
+						>AspectJ</emphasis> como tecnología subyacente: <emphasis role="italic"
+						>Glassbox, Perf4J, Contract4J, JXInsight o MaintainJ</emphasis> son algunos
+					de los ejemplos.</para>
+			</section>
+			<section>
+				<title>Compiladores e integración de IDE's</title>
+				<para>El mismo equipo de <emphasis role="italic">AspectJ</emphasis> utiliza la
+					propia tecnología para extender el compilador de <emphasis role="italic"
+						>JDT</emphasis> de manera que sea capaz de soportar las nuevas
+					construcciones. <emphasis role="italic">AJDT</emphasis> utiliza un proceso de
+					weaving a través de una implementación basada en <emphasis role="italic"
+						>OSGI</emphasis> ofrecida por el proyecto <emphasis role="italic"
+						>Equinox</emphasis>. <emphasis role="italic">Scala IDE</emphasis> en
+						<emphasis role="italic">Eclipse</emphasis> utiliza un enfoque similar para
+					la construcción del entorno de desarrollo.<footnote><para>Véase la sección
+							inicial de este capítulo</para></footnote></para>
+			</section>
+		</section>
+	</section>
+	<section>
+		<title>Introducción a AOP</title>
+		<para>
+			<emphasis role="italic">AOP</emphasis> se construye sobre metodologías existentes como
+				<emphasis role="italic">OOP</emphasis> o programación funcional, mejorándolas con
+			las construcciones necesarias que permiten modularizar correctamente los conceptos
+			transversales. Por ejemplo, si se trabaja con <emphasis role="italic">OOP</emphasis>, el
+			núcleo de nuestro sistema será implementado mediante la utilización de clases. Los
+			aspectos serán los encargados de representar las funcionalidades transversales y
+			determinar cómo todos los diferentes módulos deberán ser <emphasis>tejidos</emphasis>
+			para construir el sistema final. </para>
+		<section>
+			<title>Metodología AOP</title>
+			<para>Desarrollar un sistema utilizando <emphasis role="italic">AOP</emphasis> es
+				similar a un desarrollo basado en otras metodologías: determinar los requerimientos,
+				implementarlos y construir el sistema final mediante la combinación de los mismos.
+				La comunidad <emphasis role="italic">AOP</emphasis> define tres pasos: </para>
+			<orderedlist>
+				<listitem>
+					<para>
+						<emphasis role="bold">Descomposición en aspectos</emphasis>. En este paso se
+						identificarán los diferentes <emphasis>concerns</emphasis> , tanto los
+						transversales como los que componen el núcleo. Por ejemplo, en una capa de
+						negocio encargada de calcular el IVA total de los productos, los aspectos
+						pertenecientes al núcleo sería el cálculo del <emphasis role="italic"
+							>IVA</emphasis> en sí, mientras que elementos como la transaccionalidad,
+						registro de actividad,seguridad en hilos, manejo de cachés, . . . serían
+						conceptos de un espectro mucho más amplio, que serán necesarios en otros
+						muchos módulos del sistema, y por tanto, se categorizan como conceptos
+							<emphasis>transversales</emphasis>. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Implementación de "concerns"</emphasis>. En este punto
+						tendrá que realizarse la implementación de los diferentes requerimientos
+							<emphasis>de manera independiente</emphasis> . Siguiendo con el ejemplo
+						anterior, un grupo sería el encargado de realizar la implementación del
+						módulo de lógica de negocio encargado de calcular el IVA, otro grupo
+						llevaría a cabo la gestión del <emphasis role="italic">logging</emphasis>,
+						un tercer grupo sería el encargado de asegurarse que las operaciones fuesen
+							<emphasis>thread safe</emphasis> , y así sucesivamente. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Recomposición de aspectos</emphasis>. En este paso se
+						deben definir las reglas de composición mediante la creación de módulos o
+							<emphasis>aspectos</emphasis> . Este proceso, conocido como
+							<emphasis>weaving</emphasis> , utiliza esta información para construir
+						el sistema final.</para>
+				</listitem>
+			</orderedlist>
+			<para>La principal aportación de <emphasis role="italic">AOP</emphasis> es la
+				independencia de los "<emphasis role="italic">concerns</emphasis>" en el momento de
+				su implementación. El modo en que se realiza la implementación permite una completa
+				trazabilidad entre los requerimientos y su implementación, por lo que el sistema
+				final será más fácil de comprender, implementar o adaptar ante futuros
+				cambios.</para>
+		</section>
+		<section>
+			<title>Anatomía de un lenguaje orientado a aspectos </title>
+			<para>La orientación a aspectos es simplemente una metodología por lo que será necesario
+				definir el lenguaje y ofrecer un conjunto de herramientas para trabajar con la
+				misma. Al igual que otra metodología de programación, una implementación concreta de
+				AOP constará de dos partes:</para>
+			<itemizedlist>
+				<listitem>
+					<para>Especificación del lenguaje encargado de describir las construcciones y
+						sintaxis que serán utilizadas en la construcción y el tejido de todos los
+							"<emphasis role="italic">concerns</emphasis>", tanto los pertenecientes
+						al núcleo como los transversales.</para>
+				</listitem>
+				<listitem>
+					<para> La implementación del lenguaje es la encargada de verificar la adherencia
+						del código a la especificación del lenguaje y de trasladar el código a un
+						ejecutable capaz de ser comprendido por una máquina. Esta
+						tarea,habitualmente,es realizada por un compilador o un intérprete.</para>
+				</listitem>
+			</itemizedlist>
+			<section>
+				<title>Especificación del lenguaje <emphasis role="italic">AOP</emphasis>
+				</title>
+				<para> Cualquier implementación de la metodología <emphasis role="italic"
+						>AOP</emphasis> requiere la definición de dos lenguajes: el primero de ellos
+					permitirá realizar la implementación de los requisitos individuales mientras que
+					gracias al segundo podremos definir las reglas que "tejen" el conjunto de
+					módulos independientes. </para>
+				<itemizedlist>
+					<listitem>
+						<para>
+							<emphasis>Implementación de concerns</emphasis> . Al igual que en otras
+							metodologías, los requisitos se implementan en módulos que contienen los
+							datos y el comportamiento necesario para ofrecer sus servicios.
+							Imaginemos por ejemplo que estamos construyendo el núcleo del concern de
+							seguridad; dicho núcleo mantendrá un manager de control de accesos y una
+							colección de elementos ( <emphasis>voters</emphasis> ). Habitualmente,
+							tanto los <emphasis role="italic">concerns</emphasis> transversales como
+							los del núcleo se implementan mediante la utilización de lenguajes
+							estándar como pueden ser<emphasis role="italic"> C++</emphasis> o
+								<emphasis role="italic">Java</emphasis>.</para>
+					</listitem>
+					<listitem>
+						<para> Especificación de reglas de "tejido". Las reglas de
+								<emphasis>tejido</emphasis> especifican cómo debemos integrar los
+							diferentes <emphasis>concerns</emphasis> que hemos implementado para
+							componer el sistema final. El lenguaje utilizado para definir estas
+							reglas puede ser una evolución del lenguaje natural o algo completamente
+							diferente. Así por ejemplo, podríamos ofrecer una implementación de la
+							metodología <emphasis role="italic">AOP</emphasis> en la que Java es el
+							lenguaje base y la definición de reglas de tejido se realiza mediante un
+								<emphasis>DSL</emphasis> implementado en <emphasis>Groovy</emphasis>
+							.</para>
+					</listitem>
+				</itemizedlist>
+			</section>
+			<section>
+				<title>Implementación de <emphasis role="italic">AOP</emphasis></title>
+				<para> La implementación del lenguaje debe llevar a cabo dos acciones: combinar los
+					aspectos individuales mediante las reglas de tejido,para, posteriormente,
+					convertir la información resultante en código ejecutable. El primero de los dos
+					pasos anteriores es conocido como <emphasis role="italic">weaving</emphasis>, y
+					el procesador encargado de realizar dicha tarea es el
+						<emphasis>weaver</emphasis>.</para>
+				<itemizedlist>
+					<listitem>
+						<para>
+							<emphasis role="bold">Proceso de weaving</emphasis>. Tal y como
+							argumentaba la introducción de este punto, el proceso de <emphasis
+								role="italic">weaving</emphasis> es el encargado de componer el
+							sistema final mediante la composición de los diferentes concerns
+							siguiendo las pautas establecidas en las reglas de
+								<emphasis>tejido</emphasis> . Estas reglas son definidas en aspectos
+							independientes del núcleo del sistema por lo que con unas nuevas reglas
+							de "tejido" podríamos construir un sistema final completamente
+							diferente. </para>
+					</listitem>
+					<listitem>
+						<para>
+							<emphasis role="bold">Procesador (Weaver)</emphasis>. El procesador
+							encargado de llevar a cabo el proceso de <emphasis>weaving</emphasis>
+							descrito en el punto anterior es comúnmente conocido como
+								<emphasis>weaver</emphasis>.</para>
+						<para>Una posible implementación sería utilizar una transformación código a
+							código (un compilador). De ese modo, el compilador de <emphasis
+								role="italic">AOP</emphasis> "tejería" los aspectos junto al resto
+							de clases generando un nuevo código ya "tejido". Una vez finalizado este
+							proceso, el código generado anteriormente serviría como entrada para el
+							compilador de lenguaje base el cual sería el encargado de generar el
+							ejecutable. Utilizando el enfoque anterior, una aproximación basada en
+							C++ convertiría todos los archivos individuales (aspectos y clases) en
+							código C++ tejido(weaving). </para>
+					</listitem>
+				</itemizedlist>
+				<para>El siguiente diagrama ilustra la aproximación descrita en el párrafo
+					anterior:</para>
+				<para>
+					<figure>
+						<title>Proceso de generación del sistema final</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata fileref="images/compiler_weaver.png" width="400"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</para>
+			</section>
+		</section>
+		<section>
+			<title>Beneficios de la metodología AOP</title>
+			<para>La mayoría de las críticas sobre AOP destacan que en muchas ocasiones es demasiado
+				complejo. Evidentemente, es necesario un poco de tiempo y paciencia para conseguir
+				ser un experto. Sin embargo, el motivo principal de su complejidad es que se trata
+				de una tecnología relativamente nueva.</para>
+			<para>Algunos de los beneficios más destacables de esta metodología son:</para>
+			<itemizedlist>
+				<listitem>
+					<para>
+						<emphasis role="bold">Responsabilidades claramente diferenciadas</emphasis>.
+						Cada módulo es el responsable de su funcionalidad principal; dejando de lado
+						los conceptos transversales. Así por ejemplo, un módulo cuyo principal
+						cometido es implementar la lógica de acceso a datos de un sistema de ventas
+						por internet, no tendrá que preocuparse de realizar pooling sobre la base de
+						datos o de la transaccionalidad. Gracias a esta clara asignación de
+						responsabilidades se consigue una alta trazabilidad entre los requisitos y
+						su correspondiente implementación. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Incremento de la modularidad</emphasis>. Utilizando
+							<emphasis role="italic">AOP</emphasis> se consigue manejar cada uno de
+						los conceptos de manera independiente con un acoplamiento mínimo. Incluso
+						aunque estén presentes conceptos transversales que afecten al sistema
+						completo, la implementación es modular. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Retraso en las decisiones de diseño</emphasis>. Cuando
+						se arquitecta un nuevo sistema siempre aparece el siguiente dilema: ¿se debe
+						realizar un diseño sumamente complejo y detallado que intente abarcar todas
+						las funcionalidades, ¿incluso las futuras? o, por el contrario, ¿debe
+						arquitectarse una solución que se corresponda con la situación actual?. </para>
+					<para> Gracias a <emphasis role="italic">AOP</emphasis>, el arquitecto de la
+						solución, puede retrasar la toma de determinadas decisiones de diseño dado
+						que los futuros requerimientos se implementarán en aspectos independientes.
+						Dando un paso más adelante, <emphasis role="italic">AOP</emphasis> conforma
+						un gran equipo junto con una metodología ágil como puede ser XP (siglas en
+						inglés de Programación Extrema) siguiendo la práctica del principio YAGNI
+						(siglas en inglés de <emphasis>No lo vas a necesitar</emphasis>) . De este
+						modo, podemos seguir el principio anterior, dando vida únicamente a las
+						funcionalidades requeridas e implementando futuros requerimientos sin la
+						necesidad de grandes modificaciones en el sistema. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Sencillez en las mejoras</emphasis>. <emphasis
+							role="italic">AOP</emphasis> permite añadir una nueva funcionalidad sin
+						más que desarrollar un nuevo aspecto (el cual no afecta al núcleo del
+						sistema). Gracias a ello, el tiempo de respuesta ante nuevos requerimientos
+						disminuye notablemente. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Incremento en la reutilización del código</emphasis>.
+						Puesto que <emphasis role="italic">AOP</emphasis> implementa cada aspecto en
+						un módulo independiente, cada uno de ellos es independiente del resto.
+						Generalmente un elemento no suele tener conocimiento del resto de elementos
+						que conforman el sistema final. Realmente, el único elemento consciente del
+						acoplamiento entre los diferentes módulos son las <emphasis>reglas de
+							tejido</emphasis> , de manera que, si cambiamos éstas, podemos componer
+						un sistema final completamente diferente. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Reducción de costes y accesos al mercado más
+							rápidos</emphasis>. Las características descritas en los puntos
+						anteriores generan sistemas más rápidos, tanto en su desarrollo como en su
+							<emphasis>implantación</emphasis> . Eliminando la necesidad de modificar
+						múltiples módulos para la implementación de un nuevo concepto transversal,
+							<emphasis role="italic">AOP</emphasis> provoca que dicha implementación
+						sea más barata. Asimismo, permitiendo que los desarrolladores estén
+						centrados en su especialidad logramos que el coste del desarrollo disminuya.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</section>
+		<section>
+			<title>Verdades y mentiras sobre AOP</title>
+			<para>En los últimos años <emphasis role="italic">AOP</emphasis> ha sufrido un gran
+				crecimiento aunque, en algunas ocasiones, todavía se percibe demasiado complicado,
+				tanto en su implementación como en su proceso de aprendizaje. A continuación veremos
+				algunas hipótesis y los motivos por los que las mismas son consideradas ciertas o
+				falsas:</para>
+			<itemizedlist>
+				<listitem>
+					<para>
+						<emphasis role="bold"><emphasis role="italic">AOP</emphasis> no soluciona
+							nuevos problemas</emphasis> . Esta afirmación es completamente cierta.
+						La orientación a aspectos no ofrece solución a problemas irresolubles sino
+						que aporta soluciones más sencillas y elegantes a los problemas actuales. Al
+						fin y al cabo, no hay nada que no podamos implementar con código máquina.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Flujos complicados de seguir</emphasis> . De nuevo
+						esta afirmación es cierta. En muchas ocasiones, en función de la complejidad
+						del sistema que estemos construyendo, el orden en el que se ejecutan las
+						instrucciones puede resultar complicado de seguir. </para>
+					<para>La afirmación anterior también es cierta para otras metodologías ajenas a
+							<emphasis role="italic">AOP</emphasis>. En <emphasis role="italic"
+							>OOP</emphasis>, el uso del polimorfismo hace que analizar el flujo de
+						ejecución de un programa no sea una tarea sencilla. Incluso en lenguajes
+						procedimentales, como podría ser <emphasis role="italic">C</emphasis>, el
+						uso de punteros a funciones dificulta las tareas de seguimiento del
+						programa.</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold"><emphasis role="italic">AOP</emphasis> promueve malos
+							diseños</emphasis> . En esta ocasión la afirmación es falsa. Una
+						aproximación orientada a aspectos no es la solución para un mal diseño sino
+						que simplemente facilita nuevos modos de resolución de problemas en aquellas
+						áreas en las que lenguajes procedimentales u orientados a objetos presentan
+						carencias. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold">Los interfaces de las metodologías <emphasis
+								role="italic">OOP</emphasis> son suficientes </emphasis> . De nuevo
+						en esta ocasión, la afirmación anterior es falsa. La técnica descrita
+						propone utilizar un interfaz e ir intercambiando las implementaciones
+						subyacentes (nótese que esto no implica cambios en el API). Puede parecer a
+						simple vista que esta solución es satisfactoria, pero dista mucho de ser
+						así, puesto que necesitamos invocar al código en <emphasis>todos</emphasis>
+						aquellos lugares en los que corresponda. Esta técnica sirve de gran ayuda
+						(tanto en OOP como AOP), pero en ningún momento los interfaces son una
+						alternativa a la orientación a aspectos. </para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold"><emphasis role="italic">AOP</emphasis> supone una
+							ruptura de la encapsulación</emphasis> . Esta afirmación es cierta
+						aunque con ciertos matices puesto que dicha ruptura se realiza de una manera
+						controlada y sistemática. Las clases en OOP encapsulan todo el
+						comportamiento, mientras que AOP elimina estos niveles de control de las
+						mismas.</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis role="bold"><emphasis role="italic">AOP</emphasis> reemplazará a
+								<emphasis role="italic">OOP</emphasis></emphasis> . Falso. Los
+						conceptos principales seguirán siendo implementados en <emphasis
+							role="italic">OOP</emphasis> ( o puede que en un lenguaje procedimental
+						como puede ser <emphasis role="italic">C</emphasis>). <emphasis
+							role="italic">AOP</emphasis> añade un nuevo conjunto de conceptos
+						adicionales a la metodología orientada a objetos. Efectivamente, <emphasis
+							role="italic">AOP</emphasis> cambiará el modo en el que se utilizan las
+						metodologías actuales para la implementación de conceptos transversales.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</section>
+	</section>
+	<section>
+		<title>Visión general de <emphasis role="italic">AspectJ</emphasis></title>
+		<para>
+			<emphasis>AspectJ</emphasis> es una extensión orientada a aspectos de propósito general
+			al lenguaje <emphasis role="italic">Java</emphasis>. Puesto que es una extensión del
+			lenguaje <emphasis role="italic">Java</emphasis>, cualquier programa escrito en dicho
+			lenguaje es un programa <emphasis role="italic">AspectJ</emphasis> válido. Un compilador
+				<emphasis role="italic">AspectJ</emphasis> genera archivos
+				<emphasis>.class</emphasis> de acuerdo a la especificación del
+				<emphasis>bytecode</emphasis> de Java de manera que cualquier implementación de la
+			máquina virtual sea capaz de ejecutar dichos archivos. </para>
+		<para> El lenguaje <emphasis>AspectJ</emphasis> , de acuerdo a los conceptos descritos en el
+			apartado anterior, consta de dos partes: la especificación del lenguaje que define los
+			conceptos principales implementados mediante clases <emphasis role="italic"
+				>Java</emphasis>, y las extensiones <emphasis role="italic">AOP</emphasis> que
+			permiten realizar el tejido de los conceptos transversales. La implementación del
+			lenguaje facilita herramientas como compiladores, depuradores e integración con la
+			mayoría de IDE´s modernos. </para>
+		<para>Los siguientes apartados servirán de introducción a <emphasis role="italic"
+				>AspectJ</emphasis> y algunos conceptos avanzados gracias a los cuales se podrá
+			comenzar a escribir programas simples.</para>
+		<section>
+			<title>Introducción a <emphasis role="italic">AspectJ</emphasis></title>
+			<para> El compilador de <emphasis role="italic">AspectJ</emphasis> es el encargado de
+				utilizar los módulos que contienen las definiciones de las reglas de tejido para
+				añadir nuevo comportamiento a los elementos encargados de implementar las
+				funcionalidades principales. El proceso anterior no realiza ninguna modificación
+				sobre el código fuente del núcleo dado que el proceso de tejido se realiza sobre el
+					<emphasis>bytecode</emphasis> generado por el compilador. </para>
+		</section>
+		<section>
+			<title>Modelo de <emphasis role="italic">Joint Point</emphasis></title>
+			<para>El modelo de <emphasis role="italic">joint point</emphasis> (no vamos a traducir
+				el término) está compuesto de dos partes claramente diferenciadas: los "<emphasis
+					role="italic">join point</emphasis>", que no son más que puntos en la ejecución
+				de un programa, y los <emphasis role="italic">"pointcuts</emphasis>", un mecanismo
+				de selección de los puntos anteriores.</para>
+			<para>Imaginemos por un momento que nos encontramos desarrollando un sistema que
+				necesita gestión de la seguridad, algo muy común en el mundo en el que nos movemos y
+				que debido a la naturaleza transversal del mismo, elegimos AOP como enfoque
+				principal de nuestra solución. ¿Cuáles son los pasos que deberíamos
+							seguir?<orderedlist><listitem><para>Identificar los puntos del sistema
+							que necesitan ser protegidos, comprobando, antes de realizar el acceso,
+							que el usuario está autenticado y tiene los privilegios necesarios para
+							hacerlo.</para><para>En resumen, estamos identificando los "<emphasis
+								role="italic">joint point</emphasis>" que requieren ser
+							securizados.</para></listitem><listitem><para>Construiremos un <emphasis
+								role="italic">pointcut</emphasis> (o varios, todos los que sean
+							necesarios), que permita la selección de los "<emphasis role="italic"
+								>joint point</emphasis>" descritos en el punto
+						anterior.</para></listitem><listitem><para>Construiremos un aspecto que
+							encapsule toda la lógica de seguridad
+					requerida.</para></listitem></orderedlist></para>
+			<para>Los conceptos anteriores son sumamente importantes dado que componen la base de
+				AOP. Los siguientes subapartados profundizarán en cada uno de ellos.</para>
+			<section>
+				<title><emphasis role="italic">Joint Point</emphasis></title>
+				<para>Como ya se definió anteriormente, un <emphasis role="italic">join
+						point</emphasis> es un punto de ejecución en un sistema. Así por ejemplo, el
+					acceso al campo de una clase, la ejecución de una función o una sentencia
+						<emphasis role="italic">for</emphasis> son ejemplos de <emphasis
+						role="italic">join points</emphasis>.</para>
+				<para><emphasis role="italic">AspectJ</emphasis> solamente expone un subconjunto de
+					todos los posibles <emphasis role="italic">joint points</emphasis>, limitando de
+					este modo, el acceso a las construcciones más estables. </para>
+			</section>
+			<section>
+				<title><emphasis role="italic">Pointcuts</emphasis></title>
+				<para>Es un artefacto que nos permite seleccionar <emphasis role="italic">joint
+						points</emphasis> y recuperar su contexto. Veamos algunas de las
+					características principales:</para>
+				<section>
+					<title>Selección de <emphasis role="italic">joint points</emphasis></title>
+					<para>Los <emphasis role="italic">pointcut</emphasis> especifican un criterio de
+						selección. Utilizaremos tipos, campos, métodos, anotaciones, etc para
+						generar dichas definiciones. También podremos establecer condiciones en
+						tiempo de ejecución que tendrán que cumplirse en el <emphasis role="italic"
+							>joint point</emphasis> seleccionado.</para>
+				</section>
+				<section>
+					<title>Determinación del contexto</title>
+					<para>Los <emphasis role="italic">joint point</emphasis> disponen de información
+						en tiempo de ejecución. Determinados <emphasis role="italic"
+							>pointcuts</emphasis> pueden recolectar dicha información y pasársela al
+							<emphasis role="italic">advice</emphasis>. Por ejemplo, la llamada a un
+						método de un objeto tendrá disponible el propio objeto que realiza la
+						llamada y los argumentos que se están pasando.</para>
+				</section>
+				<section>
+					<title>Utilización de signaturas</title>
+					<para>En <emphasis role="italic">Java</emphasis>, todos los elementos que
+						componen un programa tienen una signatura. La utilización de patrones para
+						dichas signaturas permiten a los <emphasis role="italic"
+							>pointcuts</emphasis> especificar las reglas de selección de los
+							<emphasis role="italic">joint point</emphasis> que se desean
+						capturar.</para>
+				</section>
+			</section>
+			<section>
+				<title>Categorías de joint points</title>
+				<para>A continuación se verá un conjunto de categorías de <emphasis role="italic"
+						>joints points</emphasis> expuestas por <emphasis role="italic"
+						>AspectJ</emphasis>. A pesar de ser un número considerable de categorías, no
+					se han incluido todas, sino aquellas que se utilizan con mayor frecuencia. Si el
+					lector desea realizar una lectura más profunda aquí podrá encontrar todo lo que
+					necesita: <link xlink:href="http://www.eclipse.org/aspectj/docs.php">AspectJ
+						Programming Guide</link><table frame="void" border="1"><caption>Categorías
+							de joint points expuestas por <emphasis role="italic">AspectJ</emphasis>
+							(resumen)</caption><col width="25%"/><col width="25%"/><col width="50%"
+									/><thead><tr><th>Categoría</th><th>Joint Point
+									Expuesto</th><th>Código que
+									representa</th></tr></thead><tbody><tr><td>Método</td><td>Execution</td><td>Cuerpo
+									del
+									método</td></tr><tr><td>Método</td><td>Call</td><td>Invocación
+									del
+									método</td></tr><tr><td>Constructor</td><td>Execution</td><td>Ejecución
+									de la lógica de creación de un
+									objeto</td></tr><tr><td>Constructor</td><td>Call</td><td>Invocación
+									de la lógica de creación de un objeto</td></tr><tr><td>Acceso a
+									un campo</td><td>Read</td><td>Lectura de un objeto o el campo de
+									una clase</td></tr><tr><td>Acceso a un
+									campo</td><td>Write</td><td>Escritura de un objeto o el campo de
+									una clase</td></tr><tr><td>Proceso de
+									excepciones</td><td>Handler</td><td>Bloque <emphasis
+										role="italic">catch</emphasis> para manejar una
+									excepción</td></tr><tr><td>Inicialización</td><td>Class
+									init</td><td>Proceso de carga de una clase (<emphasis
+										role="italic">class
+									loading</emphasis>)</td></tr><tr><td>Inicialización</td><td>Object
+									init</td><td>Inicialización de un objeto en un
+								constructor</td></tr><tr><td>Inicialización</td><td>Object
+									pre-init</td><td>Pre-inicialización de un objeto en un
+									constructor</td></tr><tr><td>Advice</td><td>Execution</td><td>Ejecución
+									de un advice</td></tr></tbody></table></para>
+			</section>
+			<section>
+				<title>Conceptos básicos</title>
+				<para>A continuación se analizarán los elementos básicos que se deben conocer para
+					definir un <emphasis role="italic">pointcut</emphasis>.</para>
+				<section>
+					<title><emphasis role="italic">Pointcuts</emphasis> anónimos o con
+						nombre</title>
+					<para>Se permite la declaración de <emphasis role="italic">pointcuts</emphasis>
+						de cualquiera de los dos tipos. Los primeros son similares a las clases
+						anónimas, y por tanto se definen en el lugar en el que se van a utilizar. En
+						el caso de los segundos, podremos referenciarlos desde múltiples lugares,
+						permitiendo de este modo su reutilización.</para>
+				</section>
+				<section>
+					<title>Operadores</title>
+					<para><emphasis role="italic">AspectJ</emphasis> proporciona el operador unario
+						de negación (<emphasis role="bold">!</emphasis>) y dos operadores binarios:
+							<emphasis role="bold">&amp;&amp;</emphasis> y <emphasis role="bold"
+							>||</emphasis>, gracias a los cuales se permite construir reglas de
+							<emphasis role="italic">matching</emphasis> complejas mediante la
+						combinación de pointcuts más sencillos.</para>
+					<para>Tanto la semántica como la precedencia es la misma que en el lenguaje
+							<emphasis role="italic">Java</emphasis>. Así por ejemplo,en el caso del
+						operador binario <emphasis role="bold">&amp;&amp;</emphasis>, se
+						seleccionarán aquellos <emphasis role="italic">joint points</emphasis> que
+						concuerden con los dos pointcuts que actúan como operando.</para>
+				</section>
+			</section>
+			<section>
+				<title>Signaturas: sintaxis y ejemplos</title>
+				<para>Las signaturas son la base de la definición de los <emphasis role="italic"
+						>pointcuts</emphasis>. El lenguaje debe facilitar una manera sencilla que
+					permita definir criterios de selección sobre los diferentes aspectos
+					transversales que estamos implementando. En el caso de <emphasis role="italic"
+						>AspectJ</emphasis>, se utilizan expresiones regulares (<emphasis
+						role="italic">wildcards</emphasis>) en combinación con las signaturas. Los
+					siguientes <emphasis role="italic">wildcards</emphasis> son
+									soportados:<itemizedlist><listitem><para><emphasis role="bold"
+										><emphasis role="italic">*</emphasis></emphasis> especifica
+								cualquier número de caracteres, exceptuando el punto (<emphasis
+									role="italic">.</emphasis>). En la signatura de un tipo, denota
+								una parte de un tipo o de un paquete. En otros patrones denota una
+								parte del nombre (por ejemplo en métodos o
+							campos).</para></listitem><listitem><para><emphasis role="italic"
+										><emphasis role="bold">..</emphasis></emphasis> determina
+								cualquier número de caracteres, incluyendo en este caso cualquier
+								número de puntos (<emphasis role="italic"><emphasis role="bold"
+										>.</emphasis></emphasis>). En la signatura de un tipo
+								representa cualquier paquete o subpaquete. En la signatura de un
+								método representa cualquier número de
+									argumentos.</para></listitem><listitem><para><emphasis
+									role="italic"><emphasis role="bold">+</emphasis></emphasis>
+								denota cualquier subtipo de un tipo
+						determinado.</para></listitem></itemizedlist></para>
+				<para>A lo largo de los siguientes subapartados veremos, a través de una serie de
+					ejemplos, los diferentes patrones de signaturas ofrecidos por <emphasis
+						role="italic">AspectJ</emphasis> que pueden ser utilizados para seleccionar
+					diferentes <emphasis role="italic">joint points</emphasis>.</para>
+				<section>
+					<title>Signaturas de tipos</title>
+					<para>
+						<table frame="void" border="1">
+							<caption>Ejemplos de signaturas de tipos</caption>
+							<col width="20%"/>
+							<col width="40%"/>
+							<col width="40%"/>
+							<thead>
+								<tr>
+									<th>Patrón de la signatura</th>
+									<th>Descripción</th>
+									<th>Ejemplos de tipos concordantes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><emphasis role="italic">AstVisitor</emphasis></td>
+									<td>El tipo <emphasis role="italic">AstVisitor</emphasis></td>
+									<td>Sólo el tipo AstVisitor concuerda (ni tipos base ni
+										derivados)</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">*AstVisitor</emphasis></td>
+									<td>Cualquier tipo cuyo nombre termine en <emphasis
+											role="italic">AstVisitor</emphasis></td>
+									<td>Por ejemplo, <emphasis role="italic"
+											>HighlightingAstVisitor</emphasis> o <emphasis
+											role="italic">SemanticAstVisitor</emphasis> concuerdan
+										con el patrón</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">java.*.Date</emphasis></td>
+									<td>El tipo <emphasis role="italic">Date</emphasis> en cualquier
+										subpaquete directo del paquete java</td>
+									<td><emphasis role="italic">java.util.Date</emphasis> o
+											<emphasis role="italic">java.sql.Date</emphasis> son
+										ejemplos de tipos concordantes</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">javax..*</emphasis></td>
+									<td>Cualquier tipo en el paquete <emphasis role="italic"
+											>javax</emphasis> y en sus subpaquetes (tanto directos
+										como indirectos)</td>
+									<td>Cualquier tipo en el paquete <emphasis role="italic"
+											>javax.security</emphasis> así como cualquiera de sus
+										subpaquetes indirectos como <emphasis role="italic"
+											>javax.security.auth.login</emphasis>
+									</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">javax..*Model</emphasis></td>
+									<td>Todos los tipos en el paquete <emphasis role="italic"
+											>javax</emphasis> (subpaquetes directos e indirectos)
+										cuyo nombre termine en <emphasis role="italic"
+											>Model</emphasis>, y todos los subtipos de estos.</td>
+									<td><emphasis role="italic">TableModel</emphasis>, <emphasis
+											role="italic">TreeModel</emphasis> y sus subtipos como
+											<emphasis role="italic">DefaultTreeModel</emphasis> o
+											<emphasis role="italic"
+										>DefaultTableModel</emphasis>.</td>
+								</tr>
+							</tbody>
+						</table>
+					</para>
+				</section>
+				<section>
+					<title>Signaturas de tipos: anotaciones</title>
+					<para>
+						<table frame="void" border="1">
+							<caption>Ejemplos de signaturas de tipos: <emphasis role="italic"
+										><emphasis role="bold"
+								>anotaciones</emphasis></emphasis></caption>
+							<col width="20%"/>
+							<col width="40%"/>
+							<col width="40%"/>
+							<thead>
+								<tr>
+									<th>Patrón de la signatura</th>
+									<th>Descripción</th>
+									<th>Ejemplos de tipos concordantes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><emphasis role="italic">@Secured User</emphasis></td>
+									<td>El tipo <emphasis role="italic">User</emphasis> anotado con
+										la anotación <emphasis role="italic">Secured</emphasis></td>
+									<td><emphasis role="italic">@Secured class User</emphasis>{. .
+										.}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">@Entity *</emphasis></td>
+									<td>Cualquier tipo anotado con la anotación <emphasis
+											role="italic">Entity</emphasis></td>
+									<td><emphasis role="italic">@Entity class Section </emphasis>{.
+										. .},<emphasis role="italic">@Entity class Report</emphasis>
+										{. . .}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">@Transactional*
+										Manager+</emphasis></td>
+									<td>El tipo <emphasis role="italic">Manager</emphasis> y
+										cualquiera de sus clases derivadas que estén anotados con
+										una anotación cuyo nombre comience por <emphasis
+											role="italic">Transactional</emphasis></td>
+									<td><emphasis role="italic">@TransactionalDefault class
+											Manager</emphasis>{},<emphasis role="italic"
+											>@TransactionalOracle class OracleManager extends
+											Manager</emphasis>{}</td>
+								</tr>
+							</tbody>
+						</table>
+					</para>
+				</section>
+				<section>
+					<title>Signaturas de tipos: <emphasis role="italic">generics</emphasis></title>
+					<table frame="void" border="1">
+						<caption>Ejemplos de signaturas de tipos: <emphasis role="italic"><emphasis
+									role="bold">generics</emphasis></emphasis></caption>
+						<col width="20%"/>
+						<col width="40%"/>
+						<col width="40%"/>
+						<thead>
+							<tr>
+								<th>Patrón de la signatura</th>
+								<th>Descripción</th>
+								<th>Ejemplos de tipos concordantes</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><emphasis role="italic">Map &lt;Integer,String></emphasis></td>
+								<td>El tipo <emphasis role="italic">Map</emphasis> cuyo primer
+									argumento genérico está fijado a <emphasis role="italic"
+										>Integer</emphasis> y el segundo a <emphasis role="italic"
+										>String</emphasis></td>
+								<td>En este caso únicamente concordará el tipo <emphasis
+										role="italic">Map&lt;Integer,String></emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">*&lt;User></emphasis></td>
+								<td>Cualquier tipo genérico cuyo único argumento genérico sea de
+									tipo <emphasis role="italic">User</emphasis></td>
+								<td><emphasis role="italic">Collection&lt;User></emphasis>,<emphasis
+										role="italic">List&lt;User></emphasis>, . . . </td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">Collection&lt;? extends
+									User></emphasis></td>
+								<td>El tipo <emphasis role="italic">Collection</emphasis> con un
+									parámetro de tipo <emphasis role="italic">User</emphasis> o
+									derivado</td>
+								<td><emphasis role="italic">Collection&lt;User></emphasis>,
+										<emphasis role="italic"
+									>Collection&lt;DomainUser></emphasis>, . . .</td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">Collection&lt;? super
+									User></emphasis></td>
+								<td>El tipo <emphasis role="italic">Collection</emphasis>, cuyo
+									parámetro será uno de los tipos base de <emphasis role="italic"
+										>User</emphasis></td>
+								<td><emphasis role="italic">Collection&lt;Serializable></emphasis>,
+										<emphasis role="italic">Collection&lt;BaseUser></emphasis>,
+									asumiendo que, <emphasis role="italic">User</emphasis> extiende
+									o implementa, directa o indirectamente, <emphasis role="italic"
+										>Serializable</emphasis> y <emphasis role="italic"
+										>BaseUser</emphasis></td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+				<section>
+					<title>Combinando pointcuts: operadores</title>
+					<para>
+						<table frame="void" border="1">
+							<caption>Signaturas de tipo: operadores</caption>
+							<col width="20%"/>
+							<col width="40%"/>
+							<col width="40%"/>
+							<thead>
+								<tr>
+									<th>Patrón de la signatura</th>
+									<th>Descripción</th>
+									<th>Ejemplos de tipos concordantes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><emphasis role="italic">!Collection</emphasis></td>
+									<td>Cualquier tipo excepto <emphasis role="italic"
+											>Collection</emphasis></td>
+									<td><emphasis role="italic">User</emphasis>,<emphasis
+											role="italic">Model</emphasis>, <emphasis role="italic"
+											>List</emphasis> (aunque sea subclase de <emphasis
+											role="italic">Collection</emphasis>)</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">Set || Map</emphasis></td>
+									<td>Los tipos <emphasis role="italic">Set</emphasis> o <emphasis
+											role="italic">Map</emphasis></td>
+									<td>Los tipos <emphasis role="italic">Set</emphasis> y <emphasis
+											role="italic">Map</emphasis> únicamente</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">!@Transactional</emphasis></td>
+									<td>Cualquier tipo que se encuentre anotado por la anotación
+											<emphasis role="italic">Transactional</emphasis></td>
+									<td><emphasis role="italic">class
+											NonTransactionalManager</emphasis>{}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">@Serializable @Encrypted
+											*</emphasis></td>
+									<td>Cualquier tipo que se encuentre anotado por las dos
+										anotaciones</td>
+									<td><emphasis role="italic">@Serializable @Encrypted class
+											UserCredentials</emphasis>{}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">(@Serializable || @Encrypted)
+											*</emphasis></td>
+									<td>Cualquier tipo que esté anotado por alguna de las dos
+										anotaciones</td>
+									<td><emphasis role="italic">@Serializable class User
+										</emphasis>{}</td>
+								</tr>
+							</tbody>
+						</table>
+					</para>
+				</section>
+				<section>
+					<title>Signaturas de métodos y constructores</title>
+					<para>
+						<table frame="void" border="1">
+							<caption>Signaturas de métodos</caption>
+							<col width="20%"/>
+							<col width="40%"/>
+							<col width="40%"/>
+							<thead>
+								<tr>
+									<th>Patrón de la signatura</th>
+									<th>Descripción</th>
+									<th>Ejemplos de métodos concordantes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><emphasis role="italic">public void
+										User.set*(*)</emphasis></td>
+									<td>Cualquier método público de la clase <emphasis role="italic"
+											>User</emphasis> cuyo nombre comience por <emphasis
+											role="italic">set</emphasis>, cuyo tipo de retorno sea
+											<emphasis role="italic">void</emphasis>, y que espere un
+										único argumento</td>
+									<td>class User{ public void setName(String name){} }</td>
+								</tr>
+								<tr>
+									<td>public void User.*()</td>
+									<td>Cualquier método público de la clase <emphasis role="italic"
+											>User</emphasis> cuyo tipo de retorno sea <emphasis
+											role="italic">void</emphasis> y que no espere
+										argumentos</td>
+									<td>class User { public void updateInfo(){}}</td>
+								</tr>
+								<tr>
+									<td>public * User.*()</td>
+									<td>Cualquier método público de la clase <emphasis role="italic"
+											>User</emphasis> que no espera argumentos y retorna
+										cualquier tipo</td>
+									<td>class User{ public UserInfo getUserInfo(){}}</td>
+								</tr>
+								<tr>
+									<td>public * User.*(..)</td>
+									<td>Cualquier método público de la clase <emphasis role="italic"
+											>User</emphasis> que retorna cualquier tipo, y espera
+										cualquier número y tipo de argumentos (incluido cero)</td>
+									<td>class User{ public UserInfo getUserInfo(){},public Date
+										updatesBetween(Date first,Date last){}}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">* *.*(..) o * * (..)</emphasis></td>
+									<td>Cualquier método independientemente de su tipo, del tipo de
+										retorno, de su nombre y de los argumentos que espere</td>
+									<td>Cualquier método del sistema</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">!public * User.*(..)</emphasis></td>
+									<td>Cualquier método que no sea público (privado,protegido o
+										paquete)</td>
+									<td>class User {protected getUserInfo(){}}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">* * (..) throws Recognition
+											Exception</emphasis></td>
+									<td>Cualquier método que declare que puede lanzar una excepción
+										de tipo <emphasis role="italic"
+											>RecognitionException</emphasis></td>
+									<td><emphasis role="italic">class AntlRBasedParser { public void
+											parser(String file) throws
+											RecognitionException}</emphasis></td>
+								</tr>
+								<tr>
+									<td>* User+.*(..)</td>
+									<td>Cualquier método en la clase <emphasis role="italic"
+											>User</emphasis> y sus subclases</td>
+									<td><emphasis role="italic">class UserDetails extends
+											User</emphasis> {}</td>
+								</tr>
+								<tr>
+									<td><emphasis role="italic">User
+										UserService.*(..)</emphasis></td>
+									<td>Cualquier método del tipo <emphasis role="italic"
+											>UserService</emphasis> cuyo tipo de retorno sea
+											<emphasis role="italic">User</emphasis>. Si alguna de
+										las subclases sobrescribe el tipo de retorno con un subtipo
+										de <emphasis role="italic">User</emphasis> (mediante el tipo
+										de retorno covariante introducido en Java 5) también será
+										seleccionado.</td>
+									<td>class UserService{public User retrieveUser(String name){}}
+										class DetailUserService extends UserService{public
+										DetailedUser retrieveUser(String name){}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</para>
+					<para>La signatura en el caso de los constructores difiere de la signatura de
+						métodos en los siguientes aspectos:<itemizedlist><listitem><para>Los
+									constructores no tienen tipo de retorno por lo que no se permite
+									utilizar el valor de retorno en la especificación de un
+										<emphasis role="italic">pointcut</emphasis> de este
+									tipo.</para></listitem><listitem><para>Dado que los nombres de
+									los constructores no pueden ser libres (tienen que utilizar el
+									mismo nombre de la clase), la parte de la signatura destinada al
+									nombre será sustituida con la palabra <emphasis role="italic"
+										>new</emphasis>.</para></listitem><listitem><para>Por
+									último, puesto que los constructores no pueden ser estáticos, no
+									se podrá utilizar la palabra reservada <emphasis role="italic"
+										>static</emphasis></para></listitem></itemizedlist></para>
+				</section>
+				<section>
+					<title>Signaturas de campos</title>
+					<para>
+						<table frame="void" border="1">
+							<caption>Signaturas de campos de clase</caption>
+							<col width="20%"/>
+							<col width="40%"/>
+							<col width="40%"/>
+							<thead>
+								<tr>
+									<th>Patrón de la signatura</th>
+									<th>Descripción</th>
+									<th>Ejemplos de campos concordantes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><emphasis role="italic">private String
+											User.username</emphasis></td>
+									<td>Campo privado (tanto campo de una instancia como estático)
+										de la clase <emphasis role="italic">User</emphasis></td>
+									<td>class User { private String username;}</td>
+								</tr>
+								<tr>
+									<td>* User.*</td>
+									<td>Cualquier campo de la clase <emphasis role="italic"
+											>User</emphasis> independiente de sus calificadores,
+										tipo y nombre.</td>
+									<td>class User{private String username;protected int
+										credits;private UserDetails details;}</td>
+								</tr>
+								<tr>
+									<td>* User+.*</td>
+									<td>Cualquier campo de la clase <emphasis role="italic"
+											>User</emphasis> y todas sus subclases,
+										independientemente de sus calificadores, tipo y nombre.</td>
+									<td>El ejemplo de la fila anterior o <emphasis role="italic"
+											>class SpecificUser extends User {private String
+											address;</emphasis>}</td>
+								</tr>
+							</tbody>
+						</table>
+					</para>
+				</section>
+			</section>
+			<section>
+				<title>Implementación de <emphasis role="italic">pointcuts</emphasis></title>
+				<para><emphasis role="italic">AspectJ</emphasis> ofrece dos mecanismos diferentes
+					que permiten a los <emphasis role="italic">pointcuts</emphasis> realizar la
+					selección de los <emphasis role="italic">joint
+									points</emphasis>:<itemizedlist><listitem><para><emphasis
+									role="bold">Kinded pointcuts</emphasis>. En este caso, los
+									<emphasis role="italic">pointcuts</emphasis> seleccionan
+								categorías de <emphasis role="italic">joint points</emphasis> (de
+								ahí su nombre). Así, por ejemplo, se ofrece la posibilidad de
+								realizar <emphasis role="italic">matching</emphasis> sobre la
+								ejecución de un método.</para></listitem><listitem><para><emphasis
+									role="bold">Non-kinded pointcuts</emphasis>. Se seleccionan los
+									<emphasis role="italic">joint point</emphasis> en base a la
+								información de la que disponen, como los tipos en tiempo de
+								ejecución o su contexto. En esta situación se seleccionan <emphasis
+									role="italic">joint points</emphasis> de cualquier clase,
+								siempre y cuando satisfagan la condición
+						descrita.</para></listitem></itemizedlist></para>
+				<para>De nuevo, al igual que en el apartado anterior, veremos las diferentes
+					opciones disponibles, tanto para los <emphasis role="italic">kinded</emphasis>
+					como para los <emphasis role="italic">non-kinded</emphasis>
+					<emphasis role="italic">pointcuts</emphasis>.</para>
+				<section>
+					<title>Kinded <emphasis role="italic">pointcuts</emphasis></title>
+					<table frame="void" border="1">
+						<caption><emphasis role="italic">Joint Points</emphasis> expuestos y tipos
+							de <emphasis role="italic">pointcuts</emphasis></caption>
+						<thead>
+							<tr>
+								<th>Categoría de Joint Point</th>
+								<th>Sintaxis del pointcut</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Ejecución de un método</td>
+								<td><emphasis role="italic"
+									>execution(MethodSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Llamada a un método</td>
+								<td><emphasis role="italic">call(MethodSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Ejecución de un constructor</td>
+								<td><emphasis role="italic"
+										>execution(ConstructorSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Llamada a un constructor</td>
+								<td><emphasis role="italic"
+									>call(ConstructorSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Inicialización de una clase</td>
+								<td><emphasis role="italic"
+										>staticinitializaction(TypeSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Acceso de lectura a un campo</td>
+								<td><emphasis role="italic">get(FieldSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Acceso de escritura a un campo</td>
+								<td><emphasis role="italic">set(FieldSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Ejecución de un manejador de excepciones</td>
+								<td><emphasis role="italic">handler(TypeSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Inicialización de un objeto</td>
+								<td><emphasis role="italic"
+										>initialization(ConstructorSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Pre-inicialización de un objeto</td>
+								<td><emphasis role="italic"
+										>preinitialization(ConstructorSignature)</emphasis></td>
+							</tr>
+							<tr>
+								<td>Ejecución de un <emphasis role="italic">advice</emphasis></td>
+								<td><emphasis role="italic">adviceexecution()</emphasis></td>
+							</tr>
+						</tbody>
+					</table>
+					<para>Por ejemplo, si deseamos seleccionar todas las llamadas a los métodos
+						públicos <emphasis role="italic">commit()</emphasis> de la clase <emphasis
+							role="italic">TransactionManager</emphasis>, escribiríamos un pointcut
+						similar al siguiente:</para>
+					<para><emphasis role="italic">call(public void TransactionManager.commit(.
+							.))</emphasis></para>
+				</section>
+				<section>
+					<title>Non-kinded <emphasis role="italic">pointcuts</emphasis></title>
+					<para>Este tipo de <emphasis role="italic">pointcuts</emphasis> permiten la
+						selección de <emphasis role="italic">joint points</emphasis> basados en
+						criterios adicionales a las signaturas vistas anteriormente. Por ejemplo,
+						podremos seleccionar todos los <emphasis role="italic">joint
+							point</emphasis> donde el objeto <emphasis role="italic">this</emphasis>
+						es de un determinado tipo. Dicho <emphasis role="italic">joint
+							point</emphasis> incluiría las llamadas a métodos, ejecuciones,
+						manejadores de excepciones, etc.</para>
+					<para>De nuevo, a través de ejemplos, veremos los diferentes tipos de <emphasis
+							role="italic">non-kinded pointcuts</emphasis> ofrecidos por <emphasis
+							role="italic">AspectJ</emphasis></para>
+					<section>
+						<title>Non-kinded pointcuts basados en control de flujo</title>
+						<para>
+							<table frame="void" border="1">
+								<caption><emphasis role="italic">Non-kinded pointcuts</emphasis>
+									basados en control de flujo</caption>
+								<col width="35%"/>
+								<col width="65%"/>
+								<thead>
+									<tr>
+										<th>Pointcut</th>
+										<th>Descripción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><emphasis role="italic">cflow( execution(*
+												TransactionManager. commit() ))</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> en el flujo de la ejecución de
+											cualquier operación <emphasis role="italic"
+												>commit</emphasis> de la clase <emphasis
+												role="italic">TransactionManager</emphasis>,
+											incluyendo la ejecución del propio método.</td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">cflowbellow( execution(*
+												TransactionManager. commit() ))</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> en el flujo de la ejecución de
+											cualquier operación <emphasis role="italic"
+												>commit</emphasis> de la clase <emphasis
+												role="italic">TransactionManager</emphasis>,
+											excluyendo la ejecución del método.</td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">cflow(execution(@Secured * *
+												(..)))</emphasis></td>
+										<td>Todos los <emphasis role="italic">joint
+												points</emphasis> en el flujo de la ejecución de
+											cualquier método anotado con la anotación <emphasis
+												role="italic">Secured</emphasis></td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic"
+											>cflow(transacted())</emphasis></td>
+										<td>Cualquier joint point en el flujo de ejecución de los
+												<emphasis role="italic">joint points</emphasis>
+											seleccionados por el <emphasis role="italic"
+												>pointcut</emphasis>
+											<emphasis role="italic">transacted()</emphasis></td>
+									</tr>
+								</tbody>
+							</table>
+						</para>
+					</section>
+					<section>
+						<title>Non-kinded <emphasis role="italic">pointcuts</emphasis> basados en la
+							estructura léxica</title>
+						<para>Dentro de este tipo de <emphasis role="italic">pointcuts</emphasis>
+							tenemos dos categorías:<itemizedlist><listitem><para><emphasis
+											role="italic">within(TypeSingnature)</emphasis>:
+										selecciona cualquier <emphasis role="italic">joint
+											point</emphasis> que aparece en el cuerpo de las clases
+										y aspectos que concuerden con el tipo
+									especificado.</para></listitem><listitem><para><emphasis
+											role="italic"
+											>withincode(ConstructorSignature)</emphasis>,<emphasis
+											role="italic">withincode(MethodSignature)</emphasis>:
+										selecciona cualquier <emphasis role="italic">joint
+											point</emphasis> que aparezca dentro de un método o un
+										constructor, incluyendo la definición de cualquier clase
+										local que pudiera aparecer en los
+								mismos.</para></listitem></itemizedlist></para>
+						<para>
+							<table frame="void" border="1">
+								<caption><emphasis role="italic">Non-kinded pointcuts</emphasis>
+									basados en la estructura léxica</caption>
+								<col width="35%"/>
+								<col width="65%"/>
+								<thead>
+									<tr>
+										<th>Pointcut</th>
+										<th>Descripción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><emphasis role="italic">within(User)</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> que aparecen dentro de la clase
+												<emphasis role="italic">User</emphasis></td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">within(User+)</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> que aparecen dentro de la clase
+											user y cualquiera de sus clases derivadas</td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">within(@Transactional
+												*)</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> que aparecen dentro de cualquier
+											clase que se encuentre marcada con la notación <emphasis
+												role="italic">Transactional</emphasis></td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">withincode(* TransactionManager.
+												retrieve*(..))</emphasis></td>
+										<td>Selecciona todos los <emphasis role="italic">joint
+												points</emphasis> que parecen dentro de cualquier
+											método de la clase <emphasis role="italic"
+												>TransactionManager</emphasis> cuyo nombre comience
+											por <emphasis role="italic">retrieve</emphasis></td>
+									</tr>
+								</tbody>
+							</table>
+						</para>
+					</section>
+					<section>
+						<title>Non-kinded <emphasis role="italic">pointcuts</emphasis> de
+							ejecución</title>
+						<para>Este tipo de <emphasis role="italic">pointcuts</emphasis> permite
+							seleccionar <emphasis role="italic">joint points</emphasis> en base al
+							tipo de los objetos en tiempo de ejecución. De este modo se dispone
+											de:<itemizedlist><listitem><para><emphasis role="italic"
+											>this()</emphasis>. Acepta dos formas diferentes:
+											<emphasis role="italic"
+											>this(ObjectIdentifier)</emphasis> o <emphasis
+											role="italic">this(Type)</emphasis>. Seleccionará
+										aquellos <emphasis role="italic">joint points</emphasis>
+										cuyo objeto this sea del tipo (o el objeto)
+									indicado.</para></listitem><listitem><para><emphasis
+											role="italic">target()</emphasis>. Similar al concepto
+										anterior, aunque en este caso, se utilizar el <emphasis
+											role="italic">target</emphasis> del <emphasis
+											role="italic">joint point</emphasis> en lugar del
+											<emphasis role="italic"
+									>this</emphasis>.</para></listitem></itemizedlist></para>
+						<para>
+							<table frame="void" border="1">
+								<caption><emphasis role="italic">Pointcuts</emphasis> basados en la
+									ejecución</caption>
+								<col width="20%"/>
+								<col width="80%"/>
+								<thead>
+									<tr>
+										<th>Pointcut</th>
+										<th>Descripción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><emphasis role="italic">this(User)</emphasis></td>
+										<td>Selecciona cualquier <emphasis role="italic">joint
+												point</emphasis> en que la expresión <emphasis
+												role="italic">this instanceof User</emphasis> sea
+											cierta. Así por ejemplo, seleccionará las llamadas a
+											métodos o accesos a campos donde el objeto actual sea de
+											tipo <emphasis role="italic">User</emphasis> o cualquier
+											de sus subclases.</td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">target(User)</emphasis></td>
+										<td>Selecciona cualquier <emphasis role="italic">joint
+												point</emphasis> en el que el objeto sobre el que se
+											realiza la llamada al método es <emphasis role="italic"
+												>instanceof User</emphasis></td>
+									</tr>
+								</tbody>
+							</table>
+						</para>
+					</section>
+					<section>
+						<title>Non-kinded <emphasis role="italic">pointcuts</emphasis> sobre
+							argumentos</title>
+						<para>Este tipo de <emphasis role="italic">pointcuts</emphasis> permite
+							seleccionar <emphasis role="italic">joint points</emphasis> en base al
+							tipo de los argumentos en tiempo de ejecución. Veamos los distintos
+							tipos de argumentos, en función del tipo del <emphasis role="italic"
+								>joint point</emphasis> :<itemizedlist><listitem><para>En el caso de
+										los <emphasis role="italic">joint points</emphasis>
+										manejadores de excepciones el argumento será la excepción
+										manejada.</para></listitem><listitem><para>En los métodos y
+										constructores, los argumentos serán los argumentos del
+										método y constructor.</para></listitem><listitem><para>En
+										los accesos de modificación de un campo, el argumento será
+										el nuevo valor que va a tomar dicho
+								campo.</para></listitem></itemizedlist></para>
+						<para>
+							<table frame="void" border="1">
+								<caption>Ejemplos de <emphasis role="italic">pointcuts</emphasis>
+									basados en argumentos</caption>
+								<col width="20%"/>
+								<col width="80%"/>
+								<thead>
+									<tr>
+										<th>Pointcut</th>
+										<th>Descripción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><emphasis role="italic">args(User, . . ,
+												String)</emphasis></td>
+										<td>Selecciona cualquier <emphasis role="italic">joint
+												point</emphasis> de tipo método o constructor en el
+											que el primer argumento es de tipo <emphasis
+												role="italic">User</emphasis> (o cualquiera de sus
+											subclases), y el último argumento es de tipo <emphasis
+												role="italic">String</emphasis>.</td>
+									</tr>
+									<tr>
+										<td><emphasis role="italic">args
+											(SqlException)</emphasis></td>
+										<td>Selecciona cualquier <emphasis role="italic">joint
+												point</emphasis> con un único argumento de tipo
+												<emphasis role="italic">SqlException</emphasis>.
+											Seleccionaría cualquier método o constructor que
+											esperase un único argumento de tipo <emphasis
+												role="italic">SqlException</emphasis>, un acceso de
+											escritura a un campo estableciendo un nuevo valor de
+											tipo <emphasis role="italic">SqlException</emphasis>, y
+											también seleccionaría un manejador de excepciones de
+											tipo <emphasis role="italic"
+											>SqlException</emphasis></td>
+									</tr>
+								</tbody>
+							</table>
+						</para>
+					</section>
+					<section>
+						<title>Non-kinded pointcuts condicionales</title>
+						<para>Este tipo de <emphasis role="italic">pointcuts</emphasis> permiten
+							seleccionar <emphasis role="italic">joint points</emphasis> basados en
+							una expresión condicional.</para>
+						<para>
+							<table frame="void" border="1">
+								<caption>Ejemplos de pointcuts condicionales</caption>
+								<col width="20%"/>
+								<col width="80%"/>
+								<thead>
+									<tr>
+										<th>Pointcut</th>
+										<th>Descripción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><emphasis role="italic">if(debug)</emphasis></td>
+										<td>Selecciona cualquier <emphasis role="italic">joint
+												point</emphasis> donde el campo estático <emphasis
+												role="italic">debug</emphasis> (en la definición del
+											aspecto) toma el valor cierto </td>
+									</tr>
+								</tbody>
+							</table>
+						</para>
+					</section>
+				</section>
+			</section>
+		</section>
+		<section>
+			<title><emphasis role="italic">Crosscutting</emphasis><footnote><para>El término
+						crosscuting representa la naturaleza transversal de las funcionalidades que
+						estamos añadiendo. Se ha optado por no realizar la traducción del término y
+						utilizar la terminología original</para></footnote> dinámico</title>
+			<para>A lo largo de las secciones anteriores se ha analizado el modelo de <emphasis
+					role="italic">joint point</emphasis> de <emphasis role="italic"
+					>AspectJ</emphasis> y la manera de definir las reglas que permitan seleccionar
+				aquellos <emphasis role="italic">joint points</emphasis> de interés. Durante esta
+				sección se analizará el modo en el que se puede alterar el comportamiento de un
+				sistema en los <emphasis role="italic">joint points</emphasis> seleccionados
+				mediante la definición de los <emphasis role="italic">pointcuts</emphasis>.</para>
+			<section>
+				<title>Descripción general</title>
+				<para>Las reglas de tejido están compuestas de dos
+									partes:<itemizedlist><listitem><para><emphasis role="italic"
+									>advice</emphasis>: qué deseamos
+									hacer.</para></listitem><listitem><para><emphasis role="italic"
+									>pointcuts</emphasis>: dónde aplicamos el <emphasis
+									role="italic">advice</emphasis>
+						anterior.</para></listitem></itemizedlist></para>
+				<para><emphasis role="italic">AspectJ</emphasis> soporta el <emphasis role="italic"
+						>crosscutting</emphasis> dinámico mediante los <emphasis role="italic"
+						>advices</emphasis>, construcciones similares a los métodos gracias a los
+					cuales se permiten definir las acciones a ejecutar en los <emphasis
+						role="italic">joint points</emphasis> seleccionados por un <emphasis
+						role="italic">pointcut</emphasis>.</para>
+				<section>
+					<title>Categorías de <emphasis role="italic">advices</emphasis></title>
+					<para>Dependiendo de las funcionalidades que se estén implementando será
+						necesario llevar a cabo la lógica en un determinado lugar del flujo de
+						ejecución original; así por ejemplo, si se está construyendo la seguridad de
+						un sistema, el código tendrá que verificar dicha seguridad antes de la
+						ejecución del <emphasis role="italic">joint point</emphasis>. En un sistema
+						de cachés, la nueva funcionalidad tendría que ejecutarse <emphasis
+							role="italic">alrededor</emphasis> del <emphasis role="italic">joint
+							point</emphasis> original, intentando recuperar el valor de la caché, y
+						en caso de que no exista, ejecutar el código real y añadirlo a la misma para
+						futuras invocaciones. <emphasis role="italic">AspectJ</emphasis> ofrece tres
+						categorías de advices que satisfacen los escenarios anteriores (y alguno
+										más):<itemizedlist><listitem><para><emphasis role="bold"
+										>Before Advice</emphasis>: se ejecutan anteriormente a la
+									ejecución del <emphasis role="italic">joint
+									point</emphasis></para></listitem><listitem><para><emphasis
+										role="bold">After Advice</emphasis>: se ejecutan
+									posteriormente a la ejecución del <emphasis role="italic">joint
+										point</emphasis>. Existen tres variantes
+												diferentes<itemizedlist><listitem><para><emphasis
+												role="bold">After finally</emphasis>: se ejecuta
+												tras la ejecución del <emphasis role="italic">join
+												point</emphasis> independientemente del resultado
+												de la
+												misma.</para></listitem><listitem><para><emphasis
+												role="bold">After returning</emphasis>: se ejecuta
+												tras la ejecución del <emphasis role="italic">joint
+												point</emphasis> siempre y cuando ésta última haya
+												finalizado correctamente, es decir, sin lanzar
+												ninguna
+												excepción.</para></listitem><listitem><para><emphasis
+												role="bold">After throwing</emphasis>: se ejecuta
+												tras la ejecución fallida de un <emphasis
+												role="italic">joint point</emphasis>, es decir,
+												después de que dicho <emphasis role="italic">joint
+												point</emphasis> dispare una
+											excepción.</para></listitem></itemizedlist></para></listitem><listitem><para><emphasis
+										role="bold">Around Advice</emphasis>: rodean la ejecución
+									del <emphasis role="italic">joint
+								point</emphasis>.</para></listitem></itemizedlist></para>
+				</section>
+				<section>
+					<title>Sintaxis de los <emphasis role="italic">advices</emphasis></title>
+					<para>Aunque la sintaxis varía ligeramente dependiendo del tipo de <emphasis
+							role="italic">advice</emphasis> que se esté escribiendo, se podría
+						dividir su estructura general en tres partes claramente
+										diferenciadas:<itemizedlist><listitem><para><emphasis
+										role="italic">Declaración del advice</emphasis>. En esta
+									parte de la declaración se especifica el momento de ejecución
+									del advice, es decir, si se ejecutará antes, después o alrededor
+									de los <emphasis role="italic">joint
+								points</emphasis>.</para></listitem><listitem><para><emphasis
+										role="italic">Definición de los pointcuts</emphasis>. Se
+									especifican los pointcuts sobre los que se desea
+								actuar.</para></listitem><listitem><para><emphasis role="italic"
+										>Cuerpo del advice</emphasis>. Definición del código a
+									ejecutar una vez se haya alcanzado el <emphasis role="italic"
+										>joint point</emphasis>
+							indicado.</para></listitem></itemizedlist></para>
+					<para>Veamos un ejemplo sencillo de definición de un <emphasis role="italic"
+							>advice</emphasis>:</para>
+					<para> En primer lugar se define un sencillo <emphasis role="italic"
+							>pointcut</emphasis>
+						:<programlisting>
+pointcut secureOperation(User user): 
+	call( * User.*(..)) &amp;&amp; target(user)
+</programlisting></para>
+					<para>En el <emphasis role="italic">pointcut</emphasis> anterior estamos
+						capturando todas las llamadas a cualquier método de la clase <emphasis
+							role="italic">User</emphasis>, y, adicionalmente estamos recogiendo el
+						objeto que actúa como <emphasis role="italic">target</emphasis> de la
+						llamada.</para>
+					<para>A continuación veremos un <emphasis role="italic">around advice</emphasis>
+						para ilustrar la sintaxis:</para>
+					<para>
+						<programlisting>Object around(User user):secureOperation(user){
+	System.out.println("Securing operation on user " 
+						+ user.toString());
+	Object retValue = proceed(user);
+	System.out.println("Finished secured operation on user " 
+						+ user.toString());
+	return retValue;
+}</programlisting>
+					</para>
+					<para>En la definición anterior se puede ver la estructura de la declaración de
+						un <emphasis role="italic">advice</emphasis> descrita
+									anteriormente:<orderedlist><listitem><para>La parte que precede
+									a los dos puntos indica el momento de ejecución del <emphasis
+										role="italic">advice</emphasis> (<emphasis role="italic"
+										>after,before,around</emphasis>). En este caso, se ejecutará
+									alrededor del <emphasis role="italic">joint point</emphasis>
+									seleccionado.</para></listitem><listitem><para>La parte que
+									sigue a los dos puntos representa el <emphasis role="italic"
+										>pointcut</emphasis>, es decir, la definición de los
+									criterios que determinan cuándo se ejecutará el <emphasis
+										role="italic"
+									>advice</emphasis>.</para></listitem><listitem><para>La última
+									parte representa el cuerpo del <emphasis role="italic"
+										>advice</emphasis>, es decir, el código que se ejecutará
+									cuando alguno de los <emphasis role="italic">joint
+										point</emphasis> definidos por el <emphasis role="italic"
+										>pointcut</emphasis> sea
+							alcanzado.</para></listitem></orderedlist></para>
+				</section>
+			</section>
+			<section>
+				<title><emphasis role="italic">Advices</emphasis> y métodos</title>
+				<para>Al igual que los métodos de una clase, los <emphasis role="italic"
+						>advices</emphasis> se utilizan para definir comportamiento. La sintaxis de
+					éstos últimos es similar a la de los métodos aunque existen algunas diferencias
+					dado que los <emphasis role="italic">advices</emphasis> son aplicados de manera
+					automática, sin la necesidad de realizar explícitamente la invocación del
+					mismo.</para>
+				<section>
+					<title>Similitudes</title>
+					<para>A continuación se analizan las similitudes entre ambos en tres categorías
+						diferentes: declaración, cuerpo y comportamiento.</para>
+					<para>La declaración de un <emphasis role="italic">advice</emphasis> es similar
+						a la signatura de un método tradicional en
+									que:<itemizedlist><listitem><para>Opcionalmente puede asignarse
+									un nombre al <emphasis role="italic">advice</emphasis> mediante
+									el uso de la anotación <emphasis role="italic"
+										>@AdviceName</emphasis>.</para></listitem><listitem><para>Recibe
+									argumentos a través del contexto del <emphasis role="italic"
+										>joint point</emphasis>, que posteriormente podrán ser
+									utilizados en el cuerpo para implementar la lógica
+									necesaria.</para></listitem><listitem><para>Puede declarar el
+									lanzamiento de una
+						excepción.</para></listitem></itemizedlist></para>
+					<para>El cuerpo de los <emphasis role="italic">advices</emphasis> también es muy
+						parecido al de los métodos puesto que:<itemizedlist><listitem><para>El
+									código del cuerpo del <emphasis role="italic">advice</emphasis>
+									sigue las mismas reglas de acceso a miembros de otros tipos y/o
+									aspectos.</para></listitem><listitem><para>Se puede referenciar
+									a la propia instancia del aspecto mediante el uso de <emphasis
+										role="italic"
+									>this</emphasis>.</para></listitem><listitem><para>Los <emphasis
+										role="italic">advices</emphasis> de tipo <emphasis
+										role="italic">around</emphasis> pueden retornar un
+									valor.</para></listitem><listitem><para>Los <emphasis
+										role="italic">advices</emphasis> deben declarar las
+									excepciones que sean <emphasis role="italic">checked</emphasis>
+									que la implementación podría
+							disparar.</para></listitem></itemizedlist></para>
+					<para>En la categoría relativa al comportamiento, los <emphasis role="italic"
+							>advices</emphasis> :<itemizedlist><listitem><para>No pueden declarar el
+									disparo de una excepción que no está declarada en TODOS los
+										<emphasis role="italic">joint points</emphasis> sobre los
+									que actúa.</para></listitem><listitem><para>Pueden omitir
+									algunas de las excepciones de tipo checked que han sido
+									declaradas por alguno de los <emphasis role="italic">joint
+										point</emphasis> sobre los que
+									actúa.</para></listitem><listitem><para>Pueden declarar el
+									disparo de excepciones más específicas (de tipo <emphasis
+										role="italic">checked</emphasis>) que las definidas por los
+										<emphasis role="italic">joint point</emphasis> sobre los que
+									está actuando.</para></listitem><listitem><para>Pueden lanzar
+									cualquier tipo de excepción de tipo <emphasis role="italic"
+										>runtime</emphasis>.
+						</para></listitem></itemizedlist></para>
+				</section>
+				<section>
+					<title>Diferencias</title>
+					<para>En comparación con los métodos, los <emphasis role="italic"
+							>advices</emphasis> presentan las siguientes
+									diferencias:<itemizedlist><listitem><para>La declaración de un
+									nombre es opcional.</para></listitem><listitem><para>No pueden
+									ser invocados directamente.</para></listitem><listitem><para>No
+									presentan especificadores de acceso (relacionado con la
+									característica de que no pueden ser invocados
+									directamente).</para></listitem><listitem><para>No presentan un
+									tipo de retorno en los advices de tipo <emphasis role="italic"
+										>before</emphasis> y <emphasis role="italic"
+										>after</emphasis>.</para></listitem><listitem><para>Tienen
+									acceso a unas cuantas variables dentro del propio aspecto:
+										<emphasis role="italic">thisJointPoint,
+										thisJointPointStaticPart,
+										thisEnclosingJointPointStaticPart</emphasis>.</para></listitem><listitem><para>Se
+									puede utilizar la palabra reservada <emphasis role="italic"
+										>proceed</emphasis> en los advices de tipo <emphasis
+										role="italic">around</emphasis> para ejecutar el <emphasis
+										role="italic">joint point</emphasis> sobre el cual se está
+									realizando el advice.</para></listitem></itemizedlist></para>
+				</section>
+			</section>
+			<section>
+				<title>Análisis detallado de los advices</title>
+				<para>Hasta este momento se dispone de la información sobre las diferentes
+					categorías de <emphasis role="italic">advices</emphasis> y su sintaxis general.
+					A lo largo de las siguientes subsecciones se profundizará en cada uno de los
+					diferentes tipos de <emphasis role="italic">advices</emphasis>.</para>
+				<section>
+					<title><emphasis role="italic">Before advice</emphasis></title>
+					<para>Este tipo de <emphasis role="italic">advices</emphasis> se ejecutan
+							<emphasis role="bold">antes</emphasis> de la ejecución del <emphasis
+							role="italic">joint point</emphasis> sobre el que actúan. En el
+						siguiente ejemplo:</para>
+					<para>
+						<programlisting>		before():execution(@Secured * * (..)){
+			// asegurarse de que el usuario puede realizar la operación
+		}</programlisting>
+					</para>
+					<para>el <emphasis role="italic">advice</emphasis> realiza una comprobación de
+						seguridad antes de que se produzca la ejecución de cualquier método anotado
+						con <emphasis role="italic">Secured</emphasis>.</para>
+					<para>En caso de que el <emphasis role="italic">advice</emphasis> dispare una
+						excepción, el <emphasis role="italic">joint point</emphasis> no se
+						ejecutará. Este tipo de aspectos son comúnmente utilizados en aspectos tales
+						como seguridad o trazabilidad.</para>
+				</section>
+				<section>
+					<title><emphasis role="italic">After advice</emphasis></title>
+					<para>Se ejecutan <emphasis role="bold">después</emphasis> de la ejecución del
+							<emphasis role="italic">joint point</emphasis> sobre el que actúan.
+						Dentro de esta categoría, <emphasis role="italic">AspectJ</emphasis> ofrece
+						tres tipos de <emphasis role="italic"
+									>advices</emphasis>:<itemizedlist><listitem><para>Ejecución del
+										<emphasis role="italic">advice</emphasis> independientemente
+									del resultado de la ejecución del <emphasis role="italic">joint
+										point</emphasis>.</para></listitem><listitem><para>Ejecución
+									del <emphasis role="italic">advice</emphasis> única y
+									exclusivamente si el <emphasis role="italic">joint
+										point</emphasis> ha finalizado
+								correctamente.</para></listitem><listitem><para>Ejecución del
+										<emphasis role="italic">advice</emphasis> después que el
+										<emphasis role="italic">joint point</emphasis> haya
+									disparado una excepción.</para></listitem></itemizedlist></para>
+					<para>Veamos en detalle cada uno de los tres tipos anteriores:</para>
+					<section>
+						<title><emphasis role="italic">Advice After</emphasis></title>
+						<para>Este tipo de <emphasis role="italic">advices</emphasis> se ejecutan
+							independientemente del resultado de la ejecución del <emphasis
+								role="italic">joint point</emphasis> sobre el que actúan.
+							Habitualmente se conoce a este tipo de <emphasis role="italic"
+								>advices</emphasis> como <emphasis role="italic">after
+								finally</emphasis> puesto que su semántica es similar a la de un
+							bloque <emphasis role="italic">finally</emphasis>.</para>
+						<para>El siguiente <emphasis role="italic">advice</emphasis>:</para>
+						<para>
+							<programlisting>after(): call(@Logging * ServiceManager.*(..)){
+// registrar el resultado de la operación
+}</programlisting>
+						</para>
+						<para>registra el resultado de todas las operaciones de la clase <emphasis
+								role="italic">ServiceManager</emphasis> que estén marcadas con la
+							anotación <emphasis role="italic">Loggin</emphasis>, independientemente
+							si retornan correctamente o terminan su ejecución de forma inesperada
+							mediante el disparo de una excepción.</para>
+					</section>
+					<section>
+						<title><emphasis role="italic">Advice After Returning</emphasis></title>
+						<para>En muchas ocasiones,será necesario ejecutar el código de nuestro
+								<emphasis role="italic">advice</emphasis> única y exclusivamente
+							cuando la ejecución del <emphasis role="italic">joint point</emphasis>
+							haya terminado de forma correcta. Continuando con el ejemplo
+							anterior:</para>
+						<para>
+							<programlisting>after () returning: call(@Logging * ServiceManager.*(..)){
+// registrar el resultado de la operación
+}</programlisting>
+						</para>
+						<para>se seguirá registrando el resultado de las operaciones, siempre y
+							cuando, la ejecución haya terminado correctamente, sin el disparo de
+							ninguna excepción.</para>
+						<para><emphasis role="italic">AspectJ</emphasis> ofrece una pequeña variante
+							para este tipo de <emphasis role="italic">advices</emphasis>:</para>
+						<para>
+							<programlisting>
+after() returning (ReturnType returnObject)
+</programlisting>
+						</para>
+						<para>gracias a la cual se permite recuperar el objeto retornado por la
+							ejecución del <emphasis role="italic">joint point</emphasis> dentro del
+								<emphasis role="italic">advice</emphasis>. Veamos un pequeño ejemplo
+							ilustrativo:
+							<programlisting>
+after() returning (java.sql.Connection connection):
+			call(java.sql.Connection DriverManager.getConnection(..)){
+	System.out.println("Se ha recuperado la conexión "
+						+ connection);
+}</programlisting></para>
+						<para>Es importante tener claro que <emphasis role="bold">no</emphasis> se
+							puede retornar un objeto nuevo (sí puede ser modificado pero no retornar
+							uno nuevo).</para>
+					</section>
+					<section>
+						<title><emphasis role="italic">Advice After Exception</emphasis></title>
+						<para>Este tipo de <emphasis role="italic">advices</emphasis> son similares
+							a los descritos en el apartado anterior. En este caso, el <emphasis
+								role="italic">advice</emphasis> se ejecutará única y exclusivamente
+							cuando el <emphasis role="italic">joint point</emphasis> dispare una
+							excepción. Presentan la siguiente estructura:</para>
+						<para>
+							<programlisting>after() throwing:execution (* ServiceManager+.*(..))</programlisting>
+						</para>
+						<para>El <emphasis role="italic">advice</emphasis> del ejemplo anterior se
+							ejecutará siempre y cuando algún método de la clase <emphasis
+								role="italic">ServiceManager</emphasis> (o alguna de sus subclases)
+							dispare una excepción. En el supuesto de que la ejecución del <emphasis
+								role="italic">joint point</emphasis> termine correctamente, este
+							tipo de advices no serán ejecutados.</para>
+						<para>Al igual que los <emphasis role="italic">advices</emphasis> del
+							apartado anterior, <emphasis role="italic">AspectJ</emphasis> ofrece un
+							modo de recuperar la excepción que ha sido disparada por el <emphasis
+								role="italic">joint point</emphasis> de manera que esté disponible
+							en el cuerpo del advice. Siguiendo una sintaxis similar a la anterior,
+							tendríamos:</para>
+						<para>
+							<programlisting>after() throwing (ExceptionType exceptionObject):</programlisting>
+						</para>
+						<para>Un <emphasis role="italic">after throwing advice</emphasis> nunca
+							podrá tragarse la excepción, por lo que seguirá subiendo por la pila de
+							llamadas hasta llegar al objeto que realizó la invocación del <emphasis
+								role="italic">joint point</emphasis>.</para>
+					</section>
+				</section>
+				<section>
+					<title><emphasis role="italic">Around advice</emphasis></title>
+					<para>Este clase de <emphasis role="italic">advices</emphasis> engloban al
+							<emphasis role="italic">joint point</emphasis>, pudiendo ejecutar la
+						lógica del mismo un número indefinido de veces. Incluso pueden omitir la
+						ejecución del propio <emphasis role="italic">joint point</emphasis>. Algunos
+						de los usos principales de este tipo de <emphasis role="italic"
+							>advices</emphasis> son los
+									siguientes:<itemizedlist><listitem><para>Ejecución de lógica
+									adicional antes y después de la ejecución de un <emphasis
+										role="italic">joint point</emphasis>, como por ejemplo,
+									acciones de <emphasis role="italic"
+								>profiling</emphasis>.</para></listitem><listitem><para>Omitir la
+									ejecución original, y realizar otra en su lugar, como por
+									ejemplo, operaciones con
+									cachés.</para></listitem><listitem><para>Envolver la operación
+									con el objetivo de aplicar una política de gestión de
+									excepciones. Un ejemplo de este uso sería la gestión de
+									transacciones.</para></listitem></itemizedlist></para>
+					<para>Este <emphasis role="italic">advice</emphasis> ofrece una potencia
+						superior a todos los <emphasis role="italic">advices</emphasis> vistos hasta
+						el momento, puesto que podrían sustituir a los anteriores. De todos modos,
+						se considera una buena práctica utilizar el <emphasis role="italic"
+							>advice</emphasis> más sencillo que cumpla las necesidades de la tarea
+						que necesita ser llevada a cabo.</para>
+					<section>
+						<title>Ejecución del <emphasis role="italic">joint point</emphasis></title>
+						<para>Si desde el <emphasis role="italic">around advice</emphasis> se desea
+							llevar a cabo la ejecución del <emphasis role="italic">joint
+								point</emphasis>, será necesario hacer uso de la palabra reservada
+								<emphasis role="italic">proceed()</emphasis> dentro del cuerpo del
+								<emphasis role="italic">advice</emphasis>. Recuérdese que, puesto
+							que la invocación de <emphasis role="italic">proceed()</emphasis>
+							ejecuta el <emphasis role="italic">joint point</emphasis>, deberán
+							pasarse el mismo número de argumentos que han sido recolectados por el
+								<emphasis role="italic">advice</emphasis>.</para>
+						<para>Asimismo, puesto que la invocación de <emphasis role="italic"
+								>proceed()</emphasis> supone la ejecución del <emphasis
+								role="italic">joint point</emphasis>, el valor de retorno será el
+							retornado por éste último.</para>
+						<para>A continuación se adjunta un pequeño ejemplo de utilización de
+								<emphasis role="italic">advices</emphasis> de este tipo:</para>
+						<para>
+							<programlisting>void around(User user,int credits) 
+		throws InsufficientCreditsException:
+				call(* User.pay*(int)) &amp;&amp; target(user) &amp; &amp; args(credits){
+					try
+					{
+						proceed(user,credits);
+					}catch(InsufficientCreditsException ex){
+						if(!processException()){
+							throw ex;
+						}
+					}</programlisting>
+						</para>
+						<para>Analicemos en detalle la construcción
+										anterior:<orderedlist><listitem><para>El <emphasis
+											role="italic">pointcut</emphasis> selecciona cualquier
+										llamada a los métodos de la clase <emphasis role="italic"
+											>User</emphasis> cuyo nombre comience por <emphasis
+											role="italic">pay</emphasis> y disparen una excepción de
+										tipo <emphasis role="italic"
+											>InsufficientCreditsException</emphasis>.</para></listitem><listitem><para>La
+										segunda parte del <emphasis role="italic"
+											>pointcut</emphasis> recolecta el contexto del <emphasis
+											role="italic">joint point</emphasis>: el usuario sobre
+										el que se está realizando la llamada y el número de créditos
+										que se están pasando como argumento del método que se está
+										ejecutando.</para></listitem><listitem><para>En el cuerpo
+										del <emphasis role="italic">advice</emphasis>, se engloba la
+										ejecución del método con un bloque de gestión de
+										excepciones, para realizar una protección adicional en caso
+										de que se produzca una excepción. En el caso de que la
+										protección adicional no sea correcta, la excepción será
+										disparada de nuevo.</para></listitem></orderedlist></para>
+					</section>
+					<section>
+						<title>Retornando valores</title>
+						<para>Todos los <emphasis role="italic">around advices</emphasis> deben
+							declarar un valor de retorno (pudiendo ser <emphasis role="italic"
+								>void</emphasis>). Habitualmente el tipo de retorno de éstos se
+							corresponde con el tipo de retorno de los <emphasis role="italic">joint
+								points</emphasis> sobre los que está actuando.</para>
+						<para>En algunas ocasiones, todos los <emphasis role="italic">joint
+								points</emphasis> sobre los que actúa el <emphasis role="italic"
+								>advice</emphasis> no presentan el mismo tipo de retorno, como puede
+							ocurrir cuando estamos añadiendo soporte transaccional a diferentes
+							operaciones. En estas situaciones el tipo de retorno que debe declarar
+							el <emphasis role="italic">advice</emphasis> será <emphasis
+								role="italic">Object</emphasis>. <emphasis role="italic"
+								>AspectJ</emphasis> acomodará el valor de retorno de acuerdo a las
+							siguientes reglas:<itemizedlist><listitem><para>Si se está retornando un
+										tipo primitivo, <emphasis role="italic">AspectJ</emphasis>
+										realizará el <emphasis role="italic"
+											>boxing/unboxing</emphasis> correspondiente. Esta
+										característica es similar a la incluida a partir de
+											<emphasis role="italic">Java 5</emphasis>, pero
+											<emphasis role="italic">AspectJ</emphasis> no precisa de
+										dicha versión de <emphasis role="italic">Java</emphasis>
+										para realizar la
+										operación.</para></listitem><listitem><para>En el caso en el
+										que el tipo de retorno no sea primitivo, <emphasis
+											role="italic">AspectJ</emphasis> realizará los <emphasis
+											role="italic">casts</emphasis> oportunos antes de
+										retornar el valor.</para></listitem></itemizedlist></para>
+					</section>
+				</section>
+			</section>
+			<section>
+				<title>Contexto del joint point</title>
+				<para>Muchas ocasiones es necesario acceder a los objetos que conforman la ejecución
+					del <emphasis role="italic">joint point</emphasis> para que el <emphasis
+						role="italic">advice</emphasis> pueda llevar a cabo la lógica
+					correspondiente. Por tanto, los <emphasis role="italic">pointcuts</emphasis>,
+					necesitan exponer el contexto disponible en la ejecución del <emphasis
+						role="italic">joint point</emphasis> de modo que pueda estar disponible en
+					el cuerpo del <emphasis role="italic">advice</emphasis>. Dicho contexto puede
+					definirse de dos modos diferentes:<itemizedlist><listitem><para>Objetos
+								(incluyendo los tipos primitivos) que conforman el <emphasis
+									role="italic">joint
+								point</emphasis>.</para></listitem><listitem><para>Anotaciones
+								asociadas al <emphasis role="italic">joint
+							point</emphasis>.</para></listitem></itemizedlist></para>
+				<para>La siguiente tabla describe el conjunto de <emphasis role="italic"
+						>pointcuts</emphasis> que <emphasis role="italic">AspectJ</emphasis> ofrece
+					para recuperar el contexto en los <emphasis role="italic">joint
+						points</emphasis>.</para>
+				<para>
+					<table frame="void" border="1">
+						<caption>Pointcuts para recuperar el contexto en un <emphasis role="italic"
+								>joint point</emphasis></caption>
+						<col width="25%"/>
+						<col width="75%"/>
+						<thead>
+							<tr>
+								<th>Pointcut</th>
+								<th>Contexto recuperado</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><emphasis role="italic">this(obj)</emphasis></td>
+								<td>Objeto <emphasis role="italic">this</emphasis> en el <emphasis
+										role="italic">joint point</emphasis> que se está
+									ejecutando</td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">target(obj)</emphasis></td>
+								<td>Objetivo de la llamada en el <emphasis role="italic">joint
+										point</emphasis> que se está ejecutando. En el caso de un
+										<emphasis role="italic">joint point</emphasis> de una
+									llamada a un método, el <emphasis role="italic"
+										>target</emphasis> será el objeto que realiza la llamada.
+									Para la ejecución de un método, el <emphasis role="italic"
+										>target</emphasis> será el objeto <emphasis role="italic"
+										>this</emphasis>. En los accesos a campos, el <emphasis
+										role="italic">target</emphasis> será el objeto que se está
+									accediendo. En el resto de <emphasis role="italic">joint
+										points</emphasis> no existe un <emphasis role="italic"
+										>target</emphasis> disponible</td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">args(obj1,obj2,...)</emphasis></td>
+								<td>Objetos que representa los argumentos en el <emphasis
+										role="italic">joint point</emphasis>. Para las
+									llamadas/ejecuciones de métodos/constructores, recupera los
+									argumentos de los mismos. En el caso de los manejadores de
+									excepciones, recupera la excepción producida. Para los accesos
+									en modo escritura a un campo, recupera el nuevo valor del
+									campo.</td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">@this(annot)</emphasis></td>
+								<td>Anotación asociada con el tipo del objeto <emphasis
+										role="italic">this</emphasis> del <emphasis role="italic"
+										>joint point</emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">@target(annot)</emphasis></td>
+								<td>Anotación asociada con el tipo del objeto <emphasis
+										role="italic">target</emphasis> del <emphasis role="italic"
+										>joint point</emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">@args(annot1, annot2,
+									...)</emphasis></td>
+								<td>Anotación asociada con el tipo de los argumentos del <emphasis
+										role="italic">joint point</emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">@within(annot)</emphasis></td>
+								<td>Anotación asociada con el tipo "enclosing" del <emphasis
+										role="italic">joint point</emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">@withincode(annot)</emphasis></td>
+								<td>Anotación asociada con el método "enclosing" del <emphasis
+										role="italic">joint point</emphasis></td>
+							</tr>
+							<tr>
+								<td><emphasis role="italic">annotation(annot)</emphasis></td>
+								<td>Anotación asociada con el asunto actual del <emphasis
+										role="italic">joint point</emphasis>.</td>
+							</tr>
+						</tbody>
+					</table>
+				</para>
+			</section>
+		</section>
+		<section>
+			<title>Aspectos</title>
+			<para>Los aspectos representan la unidad básica de modularización en el mundo de la
+				orientación a aspectos en general, y en <emphasis role="italic">AspectJ</emphasis>
+				en particular. Los siguientes subapartados mostrarán una definición más formal que
+				la vista hasta este momento.<footnote><para>Se analizarán los nuevos conceptos, al
+						igual que en las secciones anteriores, desde el punto de vista de la
+						sintaxis tradicional, dejando un poco de lado la sintaxis <emphasis
+							role="italic">@AspectJ</emphasis>
+					</para></footnote></para>
+			<para>Se analizarán en detalle los aspectos, se realizará una comparativa con las clases
+				y se verá cómo pueden ayudar a modularizar y construir componentes
+				reutilizables.</para>
+			<section>
+				<title>Trabajando con aspectos</title>
+				<para>Los aspectos son las construcciones encargadas de encapsular la implementación
+					de todos los conceptos transversales. Será el <emphasis role="italic"
+						>weaver</emphasis> el encargado de modificar el comportamiento del núcleo
+					del sistema en función de la información definida en los aspectos.</para>
+				<para>La sintaxis general de un aspecto es la siguiente:</para>
+				<para>
+					<programlisting>
+[access specification][abstract] aspect &lt;AspectName&gt;
+[extends class or aspect] [implements interface-list]
+[ [&lt;association-speficier&gt;(Pointcut)] | 
+			[pertypewithin(TypePattern) ] ]{
+	// aspect body
+}</programlisting>
+				</para>
+				<para>La palabra reservada <emphasis role="italic">aspect</emphasis> permite
+					realizar la declaración de un nuevo aspecto. Cada uno de estos aspectos presenta
+					las siguientes características:<itemizedlist><listitem><para>Presenta un nombre
+								que permita referirse a él desde otras partes del
+							código.</para></listitem><listitem><para>Puede presentar especificadores
+								de acceso (<emphasis role="italic">public,protected</emphasis> o
+									<emphasis role="italic"
+								>private</emphasis>).</para></listitem><listitem><para>Puede ser
+									<emphasis role="italic"
+								>abstract</emphasis>.</para></listitem><listitem><para>Puede aplicar
+								el mecanismo de herencia, derivando de otros aspectos o de clases
+								tradicionales. Asimismo puede implementar
+							interfaces.</para></listitem><listitem><para>Puede especificar el modelo
+								de instanciación.</para></listitem><listitem><para>Su cuerpo puede
+								estar compuesto por definiciones de <emphasis role="italic"
+									>pointcuts</emphasis>, miembros o tipos
+							anidados.</para></listitem></itemizedlist></para>
+				<section>
+					<title>Diferencias con las clases</title>
+					<para>A la vista del apartado anterior, en un principio, parece que las clases y
+						los aspectos son prácticamente lo mismo, pero no es así, los aspectos no son
+						clases. A continuación se describen algunas de las diferencias
+						principales:</para>
+					<section>
+						<title>Modelo de instanciación</title>
+						<para>El sistema es el encargado de la instanciación de los aspectos, es
+							decir, <emphasis role="bold">nunca</emphasis> se utilizará la palabra
+							reservada <emphasis role="italic">new</emphasis> para crear una
+							instancia de un aspecto.</para>
+					</section>
+					<section>
+						<title>Restricciones en el mecanismo de herencia</title>
+						<para>Los aspectos no pueden derivar de otros aspectos concretos, sólo
+							pueden derivar de aspectos definidos como <emphasis role="italic"
+								>abstract</emphasis>. Esto es una restricción que se incluyó en la
+							definición del lenguaje para evitar complejidades innecesarias.</para>
+					</section>
+					<section>
+						<title>Parámetros genéricos</title>
+						<para>Los aspectos concretos no pueden declarar parámetros genéricos, sólo
+							aquellos marcados como <emphasis role="italic">abstract</emphasis>
+							podrán hacerlo. El motivo es el modelo de instanciación, puesto que,
+							como los aspectos son instanciados por el sistema, éste último no es
+							capaz de realizar la inferencia de tipos.</para>
+					</section>
+					<section>
+						<title><emphasis role="italic">privileged</emphasis></title>
+						<para>Los aspectos pueden ser definidos con el especificador de acceso
+								<emphasis role="italic">privileged</emphasis>, el cuál otorga la
+							capacidad de acceder a los miembros privados de las clases sobre las que
+							se está actuando.</para>
+					</section>
+				</section>
+			</section>
+		</section>
+		<section>
+			<title>Resumen</title>
+			<para>Nos hemos introducido en el mundo AOP, hemos analizado su evolución a lo largo del
+					<emphasis role="italic">Hype Cycle</emphasis>, visto sus usos en el mundo real y
+				realizado un estudio de sus principales componentes y el modo en el que se utilizan
+				cada uno de ellos.</para>
+			<para>Evidentemente, esto pretende ser un primer acercamiento al mundo de AOP, y
+				concretamente a <emphasis role="italic">AspectJ</emphasis>, a través del cual el
+				lector pueda comprender los beneficios de esta tecnología y le permita utilizarla
+				para escribir sus propios programas. Se han quedado muchas cosas en el tintero que
+				darían cabida para un libro completo, por lo que a continuación se enumeran algunas
+				de ellas para las mentes inquietas que deseen profundizar en otros aspectos que no
+				tienen cabida en este documento:<itemizedlist><listitem><para>Técnicas como
+								<emphasis role="italic">static crosscutting</emphasis> tales
+										como:<itemizedlist><listitem><para>Introducción de nuevos
+										miembros en una
+										clase.</para></listitem><listitem><para>Complemento de
+										anotaciones.</para></listitem><listitem><para>Modificación
+										de jerarquías de
+										tipos.</para></listitem><listitem><para>Respuesta a errores
+										y <emphasis role="italic">warnings</emphasis> en tiempo de
+										compilación.</para></listitem><listitem><para><emphasis
+											role="italic">Debilitado</emphasis> de
+										excepciones.</para></listitem></itemizedlist></para></listitem><listitem><para>Asociación
+							y precedencia de aspectos.</para></listitem><listitem><para>Sintaxis
+								<emphasis role="italic"
+							>@AspectJ</emphasis>.</para></listitem><listitem><para>Análisis
+							detallado de los procesos de <emphasis role="italic"
+							>weaving</emphasis>.</para></listitem><listitem><para>Integración con
+								<emphasis role="italic"
+					>Spring</emphasis>.</para></listitem></itemizedlist></para>
+			<para>Para una análisis exhaustivo de estos y otros muchos aspectos, el usuario puede
+				acudir a la sección <link linkend="aop-reference">bibliografía</link> .</para>
+			<para>El objetivo de esta introducción no era dar una visión teórica y aburrida de
+					<emphasis role="italic">AspectJ</emphasis> sino ofrecer una visión pragmática
+				del mismo. De este modo, la siguiente sección ilustrará muchos de los conceptos
+				analizados anteriormente mediante una serie de ejemplos reales.</para>
+		</section>
+		<section>
+			<title>Ejemplos reales</title>
+			<para>Hasta este momento hemos visto las posibilidades que nos ofrece <emphasis
+					role="italic">AOP</emphasis> en general, y <emphasis role="italic"
+					>AspectJ</emphasis> en particular, mediante la exploración de sus elementos,
+				sintaxis y ejemplos sencillos. Los siguientes subapartados ofrecerán un conjunto de
+				ejemplos reales de aplicación de la tecnología así como algunos patrones
+				habituales.</para>
+			<para>La estructura de los ejemplos será la siguiente: se planteará un problema, se dará
+				una solución general, y después se propondrá una alternativa basada en <emphasis
+					role="italic">AOP</emphasis> y <emphasis role="italic">AspectJ</emphasis>.
+				Pongámonos manos a la obra.</para>
+			<section>
+				<title>Patrón <emphasis role="italic">wormhole</emphasis><footnote><para>De nuevo,
+							se ha optado por mantener la nomenclatura original del patrón sin
+							realizar una traducción al castellano, puesto que el resultado de dicha
+							traducción no resultaría intuitivo para el
+					lector.</para></footnote></title>
+				<para>Este patrón consiste, básicamente, en habilitar un contexto de información
+					desde un llamante a un llamado sin la necesidad de pasar dicha información como
+					un conjunto de argumentos a lo largo de todas las invocaciones del los
+					diferentes métodos del flujo de ejecución. Imaginemos por un momento que estamos
+					implementando un sistema de seguridad en el que cada uno de los métodos tiene
+					que comprobar quién le ha invocado para determinar si está autorizado a ejecutar
+					la operación.</para>
+				<para>Creando un canal de comunicación directa entre dos niveles cualesquiera en la
+					pila de llamadas, se evitará tener que ir moviendo la información necesaria por
+					cada una de las capas. De este modo, evitaremos la necesidad de modificar la
+					cadena de llamadas cuando necesitemos añadir algún parámetro adicional al
+					contexto de información.</para>
+				<section>
+					<title>Solución <emphasis role="italic">tradicional</emphasis></title>
+					<para>Sin la utilización de una tecnología como AOP disponemos de dos
+						alternativas de solución. La primera de ellas movería toda la información
+						necesaria a lo largo del contexto de llamadas añadiendo los parámetros que
+						fueran necesarios, mientras que la segunda, haría uso de un almacenamiento
+						específico de los hilos.</para>
+					<para>La solución que pasa a través de parámetros el contexto de información
+						necesario produce una contaminación del <emphasis role="italic"
+							>API</emphasis>, puesto que cada uno de los métodos que intervienen en
+						el flujo que transcurre desde el llamante hasta el llamado necesitará de
+						parámetros adicionales que permitan mover dicha información a lo largo de la
+						pila de llamadas. La segunda solución propuesta, el uso de un almacenamiento
+						específico, pasaría porque el llamante crease una variable <emphasis
+							role="italic">ThreadLocal</emphasis> en la que se almacenase toda la
+						información necesaria. Aunque esta segunda solución evita la contaminación
+						del <emphasis role="italic">API</emphasis>, se necesita modificar tanto el
+						llamante como el llamado, además de requerir un conocimiento de cómo se
+						almacena el contexto de información.</para>
+				</section>
+				<section>
+					<title>Descripción general</title>
+					<para>La siguiente figura ilustra la idea básica de este patrón
+						arquitectónico:</para>
+					<para>
+						<figure>
+							<title>Diagrama arquitectónico del patrón <emphasis role="italic"
+									>wormhole</emphasis></title>
+							<mediaobject>
+								<imageobject>
+									<imagedata fileref="images/wormhole.png" width="400"/>
+								</imageobject>
+							</mediaobject>
+						</figure>
+					</para>
+					<para>La idea general consiste en identificar dos <emphasis role="italic"
+							>pointcuts</emphasis>: uno en el llamado y otro en el llamante. El
+						primero de ellos será el encargado de recolectar toda la información que
+						será transmitida a lo largo del "<emphasis role="italic">agujero de
+							gusano</emphasis>". El segundo <emphasis role="italic"
+							>pointcut</emphasis> tendrá que especificar aquellos <emphasis
+							role="italic">joint point</emphasis> del llamado en los que debe actuar
+						el <emphasis role="italic">wormhole</emphasis>.</para>
+					<para>En la imagen anterior cada una de las cajas transversales representa un
+						nivel en la pila de llamadas. Habitualmente, para comunicar el llamante y el
+						llamado debería moverse toda la información de nivel en nivel hasta alcanzar
+						el deseado. El patrón descrito en esta sección establece un canal de
+						comunicación directo a lo largo de todos los niveles de llamadas, evitando
+						el paso de información de un nivel a otro.</para>
+				</section>
+				<section>
+					<title>Plantilla</title>
+					<para>A continuación se propone una plantilla de solución que puede ser
+						utilizada como base para la implementación de este patrón en nuestros
+						sistemas</para>
+					<para>
+						<programlisting>
+	public aspect WormholeAspect {
+		pointcut callerSpace(caller context) : &lt;caller pointcut&gt; ;
+							
+		pointcut calleeSpace(callee context) : &lt;callee pointcut&gt; ;
+								
+		pointcut wormhole(&lt;caller context&gt;, &lt;callee context&gt;)
+			: cflow(callerSpace(&lt;caller context&gt;))
+			&amp;&amp; calleeSpace(&lt;callee context>);
+								
+			// advices para el  wormhole
+			around(&lt;caller context&gt;, &lt;callee context&gt;)
+			: wormhole(&lt;caller context&gt;, &lt;callee context&gt;) {
+				// ... advice body
+			}
+										
+	}</programlisting>
+					</para>
+					<para> En la plantilla anterior, los dos primeros <emphasis role="italic"
+							>pointcuts</emphasis> recolectan los contextos en el llamante y en el
+						llamado respectivamente. El tercero de ellos construye el <emphasis
+							role="italic">wormhole</emphasis> entre los dos espacios, capturando
+						todos los <emphasis role="italic">joint point</emphasis> determinados por el
+							<emphasis role="italic">pointcut</emphasis>
+						<emphasis role="italic">calleeSpace</emphasis> que se encuentren en el flujo
+						de ejecución de aquellos <emphasis role="italic">joint points</emphasis>
+						capturados por el <emphasis role="italic">pointcut</emphasis>
+						<emphasis role="italic">callerSpace</emphasis>.</para>
+					<para>En el siguiente ejemplo el aspecto genera un canal de comunicación entre
+						un sistema iniciador de transacciones y las ejecuciones de una query:</para>
+					<para>
+						<programlisting>public aspect SqlTransactionAspect {
+
+    pointcut transactionSystemUsage(TransactionSystem ts)
+        : execution(* TransactionSystem.*(..)) &amp;&amp; this(ts)
+                                                                   
+    pointcut queryExecutions(SqlQuery query, String[ ] params)
+        : this(query) &amp;&amp; args(params)
+        &amp;&amp; execution(public * SqlQuery.exec*(String [ ]));
+                                                              
+    pointcut wormhole(TransactionSystem ts,
+                      SqlQuery query, String[ ] params)          
+        : cflow(transactionSystemUsage(ts))                   
+        &amp;&amp; queryExecutions(query, params);
+
+    before(TransactionSystem ts,
+          SqlQuery query, String[ ] params) returning
+        : wormhole(ts, query, params) {
+		// realizar las operaciones deseadas	
+	}
+</programlisting>
+					</para>
+					<para>
+						<itemizedlist>
+							<listitem>
+								<para>El <emphasis role="italic">pointcut</emphasis>
+									<emphasis role="italic">transactionSystemUsage</emphasis>
+									captura todos los <emphasis role="italic">joint point</emphasis>
+									de ejecución en la clase <emphasis role="italic"
+										>TransactionSystem</emphasis>. Además recolecta el objeto en
+									el contexto de ejecución.</para>
+							</listitem>
+							<listitem>
+								<para>El <emphasis role="italic">pointcut</emphasis>
+									<emphasis role="italic">queryExecutions()</emphasis> captura
+									todas las llamadas a los métodos <emphasis role="italic"
+										>exec</emphasis> de la clase <emphasis role="italic"
+										>SqlQuery</emphasis> y recolecta la propia query y los
+									argumentos.</para>
+							</listitem>
+							<listitem>
+								<para>El <emphasis role="italic">pointcut</emphasis>
+									<emphasis role="italic">wormhole</emphasis> genera un canal de
+									comunicación directo entre el sistema de transacciones y la
+									ejecución de la query, capturando todos los <emphasis
+										role="italic">joint points</emphasis> que se produzcan bajo
+									el flujo de ejecución de <emphasis role="italic"
+										>transactionSystemUsage</emphasis>. Además, se captura el
+									contexto de los dos <emphasis role="italic">pointcuts</emphasis>
+									constituyentes.</para>
+							</listitem>
+							<listitem>
+								<para>El <emphasis role="italic">advice</emphasis> que actúa sobre
+									el <emphasis role="italic">pointcut</emphasis>
+									<emphasis role="italic">wormhole</emphasis> dispone ahora de
+									toda la información: la query y sus parámetros así como del
+									sistema de transacciones.</para>
+							</listitem>
+						</itemizedlist>
+					</para>
+				</section>
+			</section>
+			<section>
+				<title>Hilos seguros</title>
+				<para>La amplia difusión de los procesadores con múltiples núcleos, el uso de
+					lenguajes especializados como <emphasis role="italic">Erlang</emphasis> o
+						<emphasis role="italic">Haskell</emphasis>, y la popularidad de numerosos
+					libros al respecto, han logrado que los sistemas de software alcancen niveles de
+					concurrencia insospechados hasta hace poco tiempo.</para>
+				<para>Sin embargo, para muchos desarrolladores, incluso gente experimentada,la
+					concurrencia supone un auténtico misterio. Implementar un sistema que presente
+					un control de concurrencia es una tarea complicada, dado que, en muchas
+					ocasiones, los conceptos se difuminan a lo largo de diferentes módulos. Estas
+					circunstancias pueden ocasionar, la construcción de sistemas no demasiado ricos,
+					con errores aparentes, caídas del sistema inesperadas, integridad comprometida,
+						<emphasis role="italic">deadlocks</emphasis>, . . .</para>
+				<para>Por norma general, la implementación de un sistema de concurrencia basado en
+					los patrones arquitectónicos y de diseño apropiados suele ocasionar sistemas
+					mucho más fiables que los descritos en el párrafo anterior.</para>
+				<para>Muchos de los patrones de concurrencia presentan numerosos conceptos
+					transversales, por lo que <emphasis role="italic">AOP</emphasis> puede ayudarnos
+					a simplificar su diseño y posterior implementación. </para>
+				<para>En este ejemplo, se analiza el patrón <emphasis role="italic">read-write
+						lock</emphasis>. La implementación clásica de este patrón supone la adición
+					de código en todos aquellos métodos que necesiten modificar el estado de un
+					objeto. Los siguientes subapartados mostrarán cómo realizar una implementación
+					modular de este patrón basado en <emphasis role="italic"
+					>AspectJ</emphasis>.</para>
+				<section xml:id="readlock_traditional">
+					<title>Implementación tradicional.</title>
+					<para>Este patrón utiliza un par de bloqueos (<emphasis role="italic"
+							>locks</emphasis>): el bloqueo de lectura y el de escritura. Múltiples
+						hilos lectores podrán adquirir el bloqueo de lectura siempre y cuando el
+						bloqueo de escritura no haya sido adquirido. El otro bloqueo, el de
+						escritura, únicamente podrá ser adquirido si ninguno de los hilos restantes
+						ha tomado posesión del bloqueo de escritura.</para>
+					<para>La siguiente clase ilustra, mediante una pequeña clase de ejemplo, la
+						solución anterior.</para>
+					<para>
+						<programlisting xml:id="traditional-readlock-programlisting">
+// package definition . . .
+
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+* @author migue
+* 
+*/
+public abstract class User {
+	protected String username;
+	protected String login;
+	protected int credits;
+	
+	public User(int credits) {
+		this.credits = credits;
+	}
+	
+	private ReadWriteLock lock = new ReentrantReadWriteLock();
+	
+	public void increaseCredit(int credit) {
+		// adquirmos el bloqueo de lectura
+		this.lock.writeLock().lock();
+		
+		try {
+			// realizamos la operación, en este caso, 
+			// aumentar el crédito del usuario
+			this.credits += credit;
+		} finally {
+			// liberamos el recurso adquirido
+			this.lock.writeLock().unlock();
+		}
+	}
+	
+	public void decreaseCredit(int credit) {
+		// adquirmos el bloqueo de lectura
+		this.lock.writeLock().lock();
+		
+		try {
+			// realizamos la operación, en este caso,
+			// disminuir el crédito del usuario
+			this.credits -= credit;
+		} finally {
+			// liberamos el recurso adquirido
+			this.lock.writeLock().unlock();
+		}	
+	}
+	
+	public boolean hasCredit() {
+		// adquirimos el bloqueo de lectura
+		this.lock.readLock().lock();
+		boolean hasCredit;
+		try {
+			hasCredit = this.credits > 0 ? true : false;
+		} finally {
+			this.lock.readLock().unlock();
+		}
+		return hasCredit;
+	}
+	}</programlisting>
+					</para>
+					<para>Resulta evidente que la manera anterior de realizar los bloqueos resulta
+						intrusiva, puesto que para cada uno de los métodos en los que se desee
+						realizar un control de la concurrencia deberán añadirse los fragmentos de
+						código vistos en el ejemplo. Cualquier método en el que se olvide de añadir
+						el código de gestión de la concurrencia puede ocasionar un incorrecto
+						funcionamiento del sistema. Además, deberá asegurarse que si un método
+						adquiere el bloqueo de lectura, sea este el que libere, y no el de lectura,
+						y viceversa.</para>
+				</section>
+				<section>
+					<title>Implementación basada en <emphasis role="italic"
+						>AspectJ</emphasis></title>
+					<para>Esta alternativa de solución propone la creación de un aspecto que
+						encapsule toda la lógica del patrón descrito; evitando de este modo la
+						modificación de todas aquellas clases que necesiten hacer uso de dicho
+						patrón. Puesto que además, el patrón es reutilizable en numerosas
+						situaciones, haremos que el aspecto también lo sea.</para>
+					<para>La base de la solución, tal y como se indicaba anteriormente, consiste en
+						disponer de un aspecto abstracto que implemente toda la lógica del
+						patrón:</para>
+					<para>
+						<programlisting>
+public abstract aspect ReadWriteLockSynchronizationAspect
+
+	perthis(readOperations() || writeOperations()) 
+	{
+
+		public abstract pointcut readOperation();
+		
+		public abstract pointcut writeOperation();
+		
+		private ReadWriteLock lock 
+			= new ReentrantReadWriteLock();
+	
+		Object around(): readOperation(){
+			this.lock.readLock().lock();
+			try{
+				return proceed();
+			}finally{
+				this.lock.readLock.unlock();
+			}
+		}
+
+		Object around(): writeOperation(){
+			this.lock.writeLock().lock();
+			try{
+				return proceed();
+			}finally{
+				this.lock.writeLock.unlock();
+			}
+		}	
+	}							
+					</programlisting>
+					</para>
+					<para>A continuación se analiza en profundidad la definición del aspecto
+									anterior:<orderedlist><listitem><para>En primer lugar, mediante
+									la asociación de aspectos, se asocia una instancia
+									del aspecto con cada uno de los objetos que concuerden con los
+									criterios establecidos en los <emphasis role="italic"
+										>pointcuts</emphasis>
+									<emphasis role="italic">readOperations</emphasis> y <emphasis
+										role="italic">writeOperations</emphasis>. Nótese que una
+									nueva instancia de nuestro aspecto será creada cada vez que se
+									produzca un <emphasis role="italic">matching</emphasis>. El uso
+									de la asociación nos permite introducir, en las clases que
+									requieren sincronismo, el objeto de <emphasis role="italic"
+										>lock</emphasis>, sin necesidad de conocer el tipo de las
+									mismas.</para></listitem><listitem><para>El <emphasis
+										role="italic">pointcut</emphasis> abstracto obligará que los
+									aspectos hijos lo tengan que definir, capturando con él todas
+									las llamadas a los métodos que necesitan sincronismo y <emphasis
+										role="bold">no</emphasis> modifican el estado del
+									objeto.</para></listitem><listitem><para>De modo similar al
+									anterior, el <emphasis role="italic">pointcut</emphasis>
+									<emphasis role="italic">writeOperations</emphasis>, capturará
+									todas las llamadas a los métodos que necesiten realizar una
+									modificación en el
+									objeto.</para></listitem><listitem><para>Puesto que cada
+									matching que se produzca generará una nueva instancia del
+									aspecto para cada objeto <emphasis role="italic">this</emphasis>
+									diferente, cada elemento de sincronización estará asociado con
+									el objeto sobre el que se está realizando el <emphasis
+										role="italic"
+									>advice</emphasis>.</para></listitem><listitem><para>El
+										<emphasis role="italic">around</emphasis>
+									<emphasis role="italic">advice</emphasis>
+									<emphasis role="italic">readOperation</emphasis> adquiere y
+									libera el bloqueo de
+									lectura.</para></listitem><listitem><para>Del mismo modo,
+										<emphasis role="italic">writeOperation</emphasis>, adquiere
+									y libera el bloqueo de
+							escritura.</para></listitem></orderedlist></para>
+					<para>Una vez preparado el aspecto base se realiza una implementación concreta
+						en la siguiente sección.</para>
+					<section>
+						<title>Implementación de subaspectos</title>
+						<para>La habilitación de este patrón requiere la implementación de un
+							aspecto concreto que ponga en juego las clases sobre las que deseamos
+							establecer un control de la concurrencia. Dado que los aspectos
+							concretos tendrán que marcar qué métodos son de lectura y escritura, el
+							uso de anotaciones que simplifiquen la selección suele ser una buena
+							idea. Por tanto, se define la siguiente anotación para marcar los
+							métodos de lectura:</para>
+						<para><programlisting>
+@Target(ElementType.METHOD)
+public @interface ReadOnly{
+}</programlisting>
+							Del mismo modo se define una anotación para marcar los métodos de
+							escritura:
+							<programlisting>
+@Target(ElementType.METHOD)
+public @interface ReadWrite{
+}</programlisting></para>
+						<para>Además, se necesita definir una anotación que indique cuándo se desea
+							utilizar el patrón.
+							<programlisting>
+@Target(ElementType.TYPE)
+@Inherited
+public @interface ReadWriteLockManaged
+</programlisting></para>
+						<para>Llegados a este punto se podrá definir el aspecto ,basado en las
+							anotaciones anteriores, que aplique el patrón <emphasis role="italic"
+								>read-write lock</emphasis>.
+							<programlisting>
+public aspect AnnotationDrivenReadWriteAspect
+	extends ReadWriteLockAspect {
+
+	public pointcut readWriteLockManaged(): 
+		execution(* (@ReadWriteLockManaged *).*(..) );
+	
+	public pointcut readOperation()	
+	: execution(@ReadOnly * *(..))  &amp;&amp; readWriteLockManaged();
+	
+	public pointcut writeOperation()
+	: execution(@ReadWrite * *(..)) &amp;&amp; readWriteLockManaged();
+}
+	
+							</programlisting></para>
+						<para>A continuación se analiza en detalle la construcción del aspecto
+							anterior: <orderedlist><listitem><para>El <emphasis role="italic"
+											>pointcut</emphasis>
+										<emphasis role="italic">readWriteLockManaged</emphasis>
+										captura todas las llamadas a los métodos de aquellas clases
+										que se encuentren marcadas con la anotación <emphasis
+											role="italic"
+										>AnnotationDrivenReadWriteAspect</emphasis>.</para></listitem><listitem><para>El
+											<emphasis role="italic">pointcut</emphasis>
+										<emphasis role="italic">readOperation</emphasis> complementa
+										al anterior, seleccionando únicamente, de todos los métodos
+										capturados por <emphasis role="italic"
+											>readWriteLockManager</emphasis>, aquellos que se
+										encuentren anotados con <emphasis role="italic"
+											>ReadOnly</emphasis>.</para></listitem><listitem><para>De
+										un modo similar al anterior, el <emphasis role="italic"
+											>pointcut</emphasis>
+										<emphasis role="italic">writeOperation</emphasis>, captura
+										únicamente aquellos métodos descritos con la anotación
+											<emphasis role="italic"
+									>ReadWrite</emphasis>.</para></listitem></orderedlist></para>
+						<para>Ahora llega la parte más divertida de esta sección. Se aplica la nueva
+							construcción sobre el ejemplo analizado en la <link
+								xlink:href="#readlock_traditional">implementación
+							tradicional</link>:</para>
+						<para><programlisting xml:id="aop-readlock">							 
+// package definition . . .
+
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+* @author migue
+* 
+*/
+@ReadWriteLockManaged
+public abstract class User {
+		protected String username;
+		protected String login;
+		protected int credits;
+		
+		public User(int credits) {
+			this.credits = credits;
+		}
+		
+		@ReadWrite
+		public void increaseCredit(int credit) {
+			this.credits += credit;
+		}
+		
+		@ReadWrite
+		public void decreaseCredit(int credit) {
+			this.credits -= credit;			
+		}
+		
+		@ReadOnly
+		public boolean hasCredit() {
+			return this.credits > 0 ? true : false;
+		}
+}
+</programlisting>Comparemos
+							este listado con la <link
+								xlink:href="#traditional-readlock-programlisting">implementación
+								tradicional</link> realizada anteriormente . ¿No resulta mucho más
+							comprensible?</para>
+						<para>Evidentemente, aunque esta es una buena solución, existe un
+							acoplamiento entre la anotación <emphasis role="italic"
+								>@ReadWriteLockManaged</emphasis> y la clase anotada. Que una clase
+							indique su participación en el patrón puede no ser deseable si dicha
+							clase se utiliza en múltiples sistemas.</para>
+						<para>El problema anterior podría solucionarse mediante la inclusión de un
+							aspecto que introdujese la anotación en los tipos
+									indicados.<footnote><para>Aunque no se ha visto la introducción
+									de tipos, se ha decidido incluir un pequeño aspecto de
+									ejemplo.</para></footnote></para>
+						<para>El siguiente aspecto introduciría la anotación indicada en las clases
+							que la requieran. De este modo se evitará el acoplamiento entre la clase
+							y la anotación que aplica el patrón.</para>
+						<para>
+							<programlisting>
+public aspect InventoryReadWriteLockParticipation {
+	declare @type: User: @ReadWriteLockManaged;
+}
+</programlisting>
+						</para>
+						<para>El aspecto anterior marcaría la clase <emphasis role="italic"
+								>User</emphasis> con la anotación <emphasis role="italic"
+								>ReadWriteLockManaged</emphasis>. De este modo, la anotación de
+							cualquier clase no requeriría más que la modificación de este aspecto
+							para que detectase aquellas clases susceptibles de estar bajo la gestión
+							de concurrencia.</para>
+					</section>
+				</section>
+			</section>
+		</section>
+	</section>
+	<section>
+		<title xml:id="aop-reference">Bibliografía</title>
+		<para>Al igual que en el resto de capítulos, se incluye una referencia bibliográfica
+			específica que permitirá al lector profundizar en la temática introducida:</para>
+		<para>
+			<itemizedlist>
+				<listitem>
+					<para><link xlink:href="http://www.eclipse.org/aspectj/docs.php">AspectJ
+							Programming Guide</link></para>
+				</listitem>
+				<listitem>
+					<para>AspectJ in Action</para>
+				</listitem>
+				<listitem>
+					<para>AspectJ in Action Second Edition: Enterprise AOP with Spring
+						Applications</para>
+				</listitem>
+				<listitem>
+					<para><link
+							xlink:href="http://static.springsource.org/spring/docs/2.0.8/reference/aop.html"
+							>Spring AOP reference</link></para>
+				</listitem>
+				<listitem>
+					<para>Eclipse AspectJ. Aspect-Oriented Programming with AspectJ and the Eclipse
+						Aspect - Addison Wesley - 2004 </para>
+				</listitem>
+				<listitem>
+					<para>John Wiley And Sons Mastering Aspectj Aspect-Oriented Programming in
+						Java</para>
+				</listitem>
+				<listitem>
+					<para>AspectJ.Cookbook - OReilly - 2004</para>
+				</listitem>
+				<listitem>
+					<para>Mastering AspectJ - Wiley</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+	</section>
+</chapter>
