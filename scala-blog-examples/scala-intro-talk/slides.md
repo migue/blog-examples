@@ -132,4 +132,35 @@ Should I use __traits__?
 - Do I need to extend from a __Java__ class? --> __class__
 - Efficiency --> __class__
 - I am not sure . . . --> start with __traits__
+
 ---
+
+Fundamentals: Pattern matching
+==============================
+
+Alternative selector
+--------------------
+- __selector match { alternatives }__
+
+Case classes
+------------
+
+- __factory-method__ is included
+- Parameter list: implicit __val__
+- Instintive implementation __ToString__, __equals__ y __hashCode__
+- We can use them in pattern matching
+
+---
+
+Fundamentals: Pattern matching
+==============================
+
+Kinds of patterns
+-----------------
+
+- Wildcard
+- Constant
+- Variables
+- Constructor
+- Sequence
+- Type
