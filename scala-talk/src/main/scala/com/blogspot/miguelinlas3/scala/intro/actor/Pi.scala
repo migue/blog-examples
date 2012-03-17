@@ -1,4 +1,4 @@
-package com.blogspot.miguelinlas3.scala.intro.actor
+/*package com.blogspot.miguelinlas3.scala.intro.actor
 
 import akka.actor.{Actor, PoisonPill}
 import Actor._
@@ -98,4 +98,4 @@ object Pi extends App {
     // wait for master to shut down
     latch.await()
   }
-}
+}*/

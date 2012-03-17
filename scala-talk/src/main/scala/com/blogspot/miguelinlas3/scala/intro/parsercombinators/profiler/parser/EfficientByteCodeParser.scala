@@ -4,17 +4,6 @@ import scala.util.parsing.combinator._
 import util.parsing.input.CharSequenceReader
 import com.blogspot.miguelinlas3.scala.intro.parsercombinators.instruction._
 
-/**
- * This class use a useful feature present in Scala: the combinator parsers.
- * This class let us parse the bytecode files and build an intermediate representation for it
- *
- * Created by IntelliJ IDEA.
- * User: migue
- * Date: 3/9/11
- * Time: 12:02 AM
- * To change this template use File | Settings | File Templates.
- */
-
 class EfficientByteCodeParser extends JavaTokenParsers {
 
   lazy val integer: Parser[Int] = """-?[\d]+""".r ^^ {

@@ -4,17 +4,6 @@ import com.blogspot.miguelinlas3.scala.intro.parsercombinators.instruction.Heade
 import com.blogspot.miguelinlas3.scala.intro.parsercombinators.profiler.parser.EfficientByteCodeParser
 import com.blogspot.miguelinlas3.scala.intro.parsercombinators.stack.ExecutionContext
 
-/**
- * This visitor is used to traverse de AST returned by the parser (a simple List with bytecode isntructions)
- * an execute them
- *
- * Created by IntelliJ IDEA.
- * User: migue
- * Date: 3/20/11
- * Time: 5:05 PM
- * To change this template use File | Settings | File Templates.
- */
-
 class ExecutionVisitor {
 
   val parser = new EfficientByteCodeParser
