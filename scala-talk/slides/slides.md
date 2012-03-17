@@ -36,7 +36,7 @@ What is Scala?
 
 ---
 
-Fundamentals: classes and objects
+Classes and objects
 =================================
 
 - Class definition
@@ -46,7 +46,7 @@ Fundamentals: classes and objects
 
 ---
 
-Fundamentals: singleton objects
+Singleton objects
 =================================
 
 - No __static__ methods
@@ -57,7 +57,7 @@ Fundamentals: singleton objects
 
 ---
 
-Fundamentals: functional objects
+Functional objects
 ================================
 
 - Parámetros de clase
@@ -69,7 +69,7 @@ Fundamentals: functional objects
 
 ---
 
-Fundamentals: closures and functions
+Closures and functions
 ====================================
 
 - High order functions
@@ -79,7 +79,7 @@ Fundamentals: closures and functions
 
 ---
 
-Fundamentals: tail recursion
+Tail recursion
 ====================================
 
 - Not all the recursive functions are tail recursive
@@ -88,7 +88,7 @@ Fundamentals: tail recursion
 
 ---
 
-Fundamentals: currying
+Currying
 ====================================
 
 - Functional paradigm technique
@@ -97,7 +97,12 @@ Fundamentals: currying
 
 ---
 
-Fundamentals: traits (I)
+Lists and collections
+===========================
+- XXX Complete this section!
+---
+
+Traits (I)
 ========================
 
 - Attributes and methods
@@ -110,7 +115,7 @@ Fundamentals: traits (I)
 
 ---
 
-Fundamentals: traits (II)
+Traits (II)
 =========================
 
 - Enrich existing interfaces
@@ -121,7 +126,7 @@ Fundamentals: traits (II)
 
 ---
 
-Fundamentals: traits (III)
+Traits (III)
 ===========================
 
 Should I use __traits__?
@@ -135,7 +140,7 @@ Should I use __traits__?
 
 ---
 
-Fundamentals: Pattern matching
+Pattern matching
 ==============================
 
 Alternative selector
@@ -152,7 +157,7 @@ Case classes
 
 ---
 
-Fundamentals: Pattern matching
+Pattern matching
 ==============================
 
 Kinds of patterns
@@ -164,3 +169,27 @@ Kinds of patterns
 - Constructor
 - Sequence
 - Type
+
+---
+
+Implicits (I)
+==============================
+
+- __Similar__ to open classes or metaclasses
+- Try to solve __type problems__
+- The compiler will try to include them (should be in the scope)
+- One implicit at a time
+- 
+
+---
+
+Implicits (II)
+==============================
+Where __implicits__ can be used?
+
+- Convert to a custom type
+- Convert the receiving object of a method call
+- Function parameters
+
+---
+
