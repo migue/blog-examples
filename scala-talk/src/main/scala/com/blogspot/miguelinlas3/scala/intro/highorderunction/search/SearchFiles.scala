@@ -16,7 +16,7 @@ object Search {
 
 	def main (args : Array[String]) : Unit = {
 		
-		val foundFiles = filesEndingWith("sbt")
+		val foundFiles = filesEndingWith("")
 
 		for (file <- foundFiles) {
 			println (file)
