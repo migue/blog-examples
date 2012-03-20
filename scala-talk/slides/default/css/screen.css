@@ -64,6 +64,19 @@ div.slide {
   -webkit-border-bottom-left-radius: 20px;
 }
 
+div.highlight {
+   background-color: white;
+   color: black;
+   width: 800px;
+   padding: 8px;
+   -moz-border-radius: 20px;
+   -webkit-border-radius: 20px;
+   
+   box-shadow: 15px -10px 3px black;
+   -webkit-box-shadow: 15px -10px 3px black;
+   -moz-box-shadow: 15px -10px 3px black;
+}
+
 div.slide p {
   font-size: 30px;
 }
