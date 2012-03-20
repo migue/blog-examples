@@ -226,12 +226,6 @@ Code example (II)
 
 ---
 
-Lists and collections
-===========================
-- XXX Complete this section!
-
----
-
 Traits (I)
 ========================
 
