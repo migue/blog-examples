@@ -335,23 +335,92 @@ Case classes
 - Parameter list: implicit __val__
 - Instintive implementation __ToString__, __equals__ y __hashCode__
 - We can use them in pattern matching
+- __sealed__ classes
 
 ---
 
-Pattern matching
+Pattern matching: Wildcard
 ==============================
-
-Kinds of patterns
------------------
-
-- Wildcard
-- Constant
-- Variables
-- Constructor
-- Sequence
-- Type
+    
+    !scala
+    case class Simple 
+    	(private val x:Int, private val y:Int, private val operator:String) {}
+	
+	Simple(1, 2, "+") match {			
+		case s@Simple(_,_,_) => println(s + " is a Simple object")			
+		case _ => println("Matching all the rest!!")
+	}
 
 --- 
+
+Pattern matching: Constant
+==============================
+
+    !scala
+    def what(x: Any) = x match {
+		case 11 => "eleven"
+		case Nil => "Empty"
+		case true => "True"
+		case _ => "Unhandled!"
+	}
+
+--- 
+
+Pattern matching: Variables
+==============================
+    
+    !scala
+    val x = 1;
+
+	x match {
+		case 0 => println("0 value")
+		case variable => 
+			println("The variable " + variable + " is bounded so we can use it!")
+	}
+
+--- 
+
+Pattern matching: Constructor
+==============================
+
+	!scala
+    case class Simple 
+    	(private val x:Int, private val y:Int, private val operator:String)
+	
+	Simple(1, 2, "+") match {			
+		case s@Simple(_,_,_) => println(s + " is a Simple object")			
+		case _ => println("Matching all the rest!!")
+	}
+
+--- 
+
+Pattern matching: Sequence
+==========================
+
+	!scala
+	def firstElem[A](x:List[A]) = x match {			
+		case List(first@_, _*) => 
+			println("This is the first eleme of the list is " + first)
+		case _ 	=>
+	}
+
+	firstElem[Int](List(3,4,1))
+
+--- 
+
+Pattern matching: Type
+==============================
+	
+	!scala
+	def determineType(x:Any) = x match {
+		case s: String => println ("String")
+		case l: List[_] => println ("List")
+		case l: Map[_,_] => println ("Map")
+		case _ => println ("Unhandled type!")
+	}
+
+--- 
+
 
 Implicits (I)
 ==============================
