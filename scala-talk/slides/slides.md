@@ -701,10 +701,7 @@ Drawbacks
 - Compiler performance
 	- Much slower than `javac`
 - IDE support
-	- `Scala IDE`
-	- `IntelliJ`
-	- `Sublime Text` (I really like it!)
-	- . . . 
+	- `Scala IDE`, `IntelliJ`, `Sublime Text` (I really like it!)
 - Binary compatibility
 - Learning curve
 - Community
