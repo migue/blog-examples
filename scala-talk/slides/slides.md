@@ -127,36 +127,141 @@ Code example
 	class Rational(n: Int, d: Int) {
 	  require(d != 0, "Denominador no puede ser cero")
 
-		  val numer: Int = n
-		  val denom: Int = d
+	  val numer: Int = n
+	  val denom: Int = d
 
-		  override def toString = n + "/" + d
+	  override def toString = n + "/" + d
 
-		  def add(that: Rational): Rational =
-		    new Rational(numer * that.denom + that.numer * denom, denom * that.denom)
-		  private def gcd(a: Int, b: Int): Int =
-		    if (b == 0)
-		      a
-		    else gcd(b, a % b)
+	  def add(that: Rational): Rational =
+	    new Rational(numer * that.denom + that.numer * denom, denom * that.denom)
+	  private def gcd(a: Int, b: Int): Int =
+	    if (b == 0)
+	      a
+	    else gcd(b, a % b)
 
-		  def +(that: Rational): Rational =
-		    new Rational(numer * that.denom + that.numer * denom, denom * that.denom)
-		  def *(that: Rational): Rational =
-		    new Rational(numer * that.numer, denom * that.denom)
-		}
+	  def +(that: Rational): Rational =
+	    new Rational(numer * that.denom + that.numer * denom, denom * that.denom)
+	  def *(that: Rational): Rational =
+	    new Rational(numer * that.numer, denom * that.denom)
+	}
 
  
 ---
 
-Closures and functions
-====================================
-
+Functions and closures
+======================
+- Methods
 - Literal and value functions
-- Closures: free variables
-- Changes visibility
-- High order functions
+- Placeholder and partial functions
+- Closures
 
 ---
+
+Methods
+=======
+
+	!scala
+	object MethodsSample {
+		def processFile(filename: String, width: Int) {
+		
+			val source = Source.fromFile(filename)
+		
+			for (line <- source.getLines())
+
+			processLine(filename, width, line)
+		}
+
+		private def processLine(filename: String,width: Int, line: String) {
+			if (line.length > width)
+				println(filename +": "+ line.trim)
+		}
+	}
+
+
+---
+
+Literal functions
+======================
+	!scala
+	object FirstClassFunctions {
+		val concat = (s:String ) => s + ".scala"
+
+		val concat2 = (s1:String, s2:String) => {
+			println ("More examples con literal functions")
+			s1 + ".scala" + "---" + s2 + ".scala"
+		}
+
+		def main (args : Array[String]) : Unit = {
+			println(concat("file"))
+			println(concat2("file1", "file2"))
+
+			// use them in Scala library
+			val nums = List(1, 2, 3, 4, 5, 6)
+
+			nums.foreach((x:Int) => {val t = x + 1; println(t);})
+
+		}
+	}	
+
+---
+
+Placeholder syntax
+===================
+
+	!scala
+	object Search {	
+		private def filesInCurrentFolder = (new java.io.File(".")).listFiles
+		
+		private def filesMatching(matcher: String => Boolean) =
+			for (file <- filesInCurrentFolder; if matcher(file.getName)) yield file
+
+		def filesEndingWith(query: String) = filesMatching(_.endsWith(query))
+		
+		def filesContaining(query: String) = filesMatching(_.contains(query))
+		
+		def filesMatchRegex(query: String) = filesMatching(_.matches(query))
+
+
+		def main (args : Array[String]) : Unit = {		
+			val foundFiles = filesEndingWith("sbt")
+
+			for (file <- foundFiles) {
+				println (file)
+			}
+		}
+	}
+
+---
+
+Partial functions
+==================
+
+	!scala
+	object PartialFunction {
+	
+		def concat(s1:String, s2:String, s3:String) = s1 + s2 + s3
+
+		def concat2 = concat("Prefix", _:String, "Suffix")
+	}
+
+---
+
+
+Closures
+========
+
+	!scala
+	var sum = 0
+
+	val nums = List(1,2,3,4,5,6,8,9,10,11)
+
+	nums.foreach(sum += _)
+
+	println(sum)
+	
+
+---
+
 
 Tail recursion
 ====================================
@@ -164,6 +269,26 @@ Tail recursion
 - Not all the recursive functions are tail recursive
 - __JVM bytecode__ restrictions/limitations
 - Indirect recursions does not work
+
+---
+
+Tail recursion
+====================================
+	
+Non tail recursive
+
+	!scala
+	def nonTailRecursive(x: Int): Int =
+	    if (x == 0) throw new Exception("Stop!")
+    	else nonTailRecursive(x - 1) + 1
+
+Tail recursive
+
+	!scala
+	def tailRecursive(x: Int): Int =
+    	if (x == 0) throw new Exception("Stop!")
+    	else tailRecursive(x - 1)
+
 
 ---
 
@@ -580,6 +705,7 @@ Drawbacks
 	- `IntelliJ`
 	- `Sublime Text` (I really like it!)
 	- . . . 
+- Binary compatibility
 - Learning curve
 - Community
 
@@ -612,7 +738,7 @@ Some references
 - [Programming Scala](http://ofps.oreilly.com/titles/9780596155957/)
 - [Programming Scala: Tackle Multi-Core Complexity on the Java Virtual Machine](http://pragprog.com/book/vsscala/programming-scala) 
 - [Functional programming in Scala](http://manning.com/bjarnason/)
-- []()
+- [Learn you Haskell for a Great Good](http://learnyouahaskell.com/)
 
 ---
 
