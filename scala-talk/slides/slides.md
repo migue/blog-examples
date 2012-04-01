@@ -2,6 +2,15 @@
 
 ---
 
+Twitter & friends
+==================================
+- `@MadridJUG`
+- `#scalafans`
+- `#codemotion` `#es`
+
+---
+
+
 About me
 ==================================
 - Miguel Pastor
