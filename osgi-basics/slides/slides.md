@@ -196,3 +196,4 @@ Advanced concepts (II)
 	- Apache Felix iPojo
 - Web applications
 	- OSGI Http service
+	- Real use case: Liferay
