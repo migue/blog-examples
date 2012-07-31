@@ -155,11 +155,44 @@ Deeper into modularity
 ======================
 
 - Import your exports
--
+- Implicit export attributes
+- Mandatory attributes and directives
+- Optional and dynamic imports
+- Requiring bundles
 
 ---
 
-Delving deeper in Liferay
+Fragments
 =========================
 
-- A quick overview on Liferay's future
+- Breaking a module into pieces
+- Host bundle
+- `Fragment-Host: org.foo.hostbundle; bundle-version="[a.b.c,d.e.f)"`
+- Extends the bundle `classpath`
+- Typical use cases:
+	- I18N
+
+---
+
+Advanced concepts (I)
+=====================
+
+- Configuring my apps
+	- Configuration Admin Service
+- A world of events
+	- The event admin
+- Embedding OSGI on top JEE Server
+- Remote services and cloud computing
+- Interacting with JMX
+
+---
+
+Advanced concepts (II)
+======================
+
+- Components and frameworks
+	- Declarative services
+	- Blueprint
+	- Apache Felix iPojo
+- Web applications
+	- OSGI Http service
