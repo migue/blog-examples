@@ -1,0 +1,165 @@
+__Modularity in Java__
+
+A quick __OSGI__ overview
+
+Miguel Ángel Pastor Olivar
+
+`miguelinlas3@gmail.com`
+
+[Twitter](http://twitter.com/miguelinlas3)
+
+[Blog](http://migue.github.com)
+
+---
+
+Agenda
+======
+
+- Java's modularity limitations
+- OSGI basics and benefits
+- OSGI in practice
+- Some advanced concepts
+	- Components, frameworks and some more stuff
+- Q & A
+
+---
+
+Java's modularity?
+==================
+
+- Code visibility control is __low level__ 
+	- `private`, `protected`, `package`
+- Java `classpath` is error prone
+	- Good practices but hides tons of issues
+	- They were not designed for app developers
+- Lack of support for deployment and management
+
+---
+
+Do we need to modularize??
+==========================
+
+- Jars hell
+- Have you ever worked with DLL??
+- Logical structure of the applications
+	- __Cohesion__: we should be driven by high cohesion
+	- __Loosely coupling__ should be a must
+
+---
+
+Brief history
+=============
+
+- Open Service Gateway Initiatives
+- Formed in March 1999
+- "universal integration platform for the interoperability of applications and services."
+	- Diversing programming API
+	- Device capability
+	- Suporting dynamic changes
+	- Lightweight system
+
+---
+
+Enterprise OSGI
+===============
+- Embedded market was the initial target
+- Gain popularity and maturity
+	- Born OSGi Service Platform Enterprise Specification (Enterprise OSGi).
+- Main features:
+	- Management and configuration
+	- Distribution
+	- Data access
+
+---
+
+OSGI benefits
+=============
+- Large systems complexity: handle with it!
+- Extensibility (no erosion)
+- Lighweight
+- Portability
+
+---
+
+OSGI basic architecture
+=======================
+
+![osgi_basic_architecture](img/osgi_basic_architecture.png)
+
+---
+
+OSGI module layer
+=================
+
+- OSGI module concept: `bundle`
+- Basic elements of a `bundle`
+	- Classes
+	- Resources
+	- Metadata (`manifest.mf`)
+		- Human-readable information
+		- Bundle identification
+		- Code visibility
+- Declare external dependencies on other packages
+
+---
+
+OSGI lifecycle layer
+====================
+
+- Defines how bundles are installed and managed
+
+![osgi_bundle_lifecycle](img/osgi_bundle_lifecycle.png)
+
+---
+
+OSGI service layer
+==================
+
+- __SOA__ inside a __JVM__
+- Publish, find and bind pattern
+- Interface development approach
+- CRC (Class Responsability Collaboration)
+
+---
+
+Quick tour
+================
+- OSGI bundles
+- Bundle dependencies
+- Running bundles
+- OSGI Services and ServiceRegistry
+
+---
+
+Registry design pattern
+=======================
+
+- Find a service by its name or some attribute
+- Consuming bundle, Registry service, Provider bundle 
+- Consuming bundle searches the registry
+- Consuming bundle doesn't know who provides the services or care how
+
+---
+
+Whiteboard design pattern
+=========================
+
+- Client to be called back when needed by an invoker bundle 
+- Client bundle, registry, service, invoker bundle
+- Client bundle registers a shared service in the registry and waits to be called
+- Concerned only with implementing the callback interface
+
+--- 
+
+Deeper into modularity
+======================
+
+- Import your exports
+-
+
+---
+
+Delving deeper in Liferay
+=========================
+
+- A quick overview on Liferay's future
