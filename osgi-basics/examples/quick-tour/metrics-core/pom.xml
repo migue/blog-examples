@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.github.migue.osgi</groupId>
+	<artifactId>metrics-core</artifactId>
+	<version>0.1.1</version>
+	<packaging>bundle</packaging>
+
+	<name>metrics-core</name>
+	<url>http://github.com/migue/blog-examples/osgi-basics</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+			<version>4.0.3</version>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.felix</groupId> -->
+		<!-- <artifactId>org.apache.felix.gogo.shell</artifactId> -->
+		<!-- <version>0.10.0</version> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.felix</groupId> -->
+		<!-- <artifactId>org.apache.felix.gogo.command</artifactId> -->
+		<!-- <version>0.12.0</version> -->
+		<!-- </dependency> -->
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>com.github.migue.metrics.api.*,
+							com.github.migue.metrics.spi.*</Export-Package>
+						<Private-Package>com.github.migue.metrics.internal.*</Private-Package>
+						<Bundle-Activator>com.github.migue.metrics.internal.manager.MetricsManager</Bundle-Activator>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

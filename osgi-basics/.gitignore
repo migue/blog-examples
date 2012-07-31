@@ -1,0 +1,11 @@
+# Maven related
+
+*/target/*
+
+# Landslide related
+
+slides/presentation.html
+
+# Eclipse related
+**/.project
+**/.classpath
