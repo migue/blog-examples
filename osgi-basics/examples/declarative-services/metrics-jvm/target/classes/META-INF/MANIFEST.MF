@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1343850380500
+Build-Jdk: 1.6.0_33
+Built-By: migue
+Bundle-ManifestVersion: 2
+Bundle-Name: metrics-jvm
+Bundle-SymbolicName: com.github.migue.osgi.metrics-jvm
+Bundle-Version: 0.1.2
+Created-By: Apache Maven Bundle Plugin
+Export-Package: com.github.migue.metrics.jvm.api.model;uses:="com.github
+ .migue.metrics.api.model";version="0.1.2"
+Import-Package: com.github.migue.metrics.api.model;version="[0.1,1)",com
+ .github.migue.metrics.jvm.api.model,com.github.migue.metrics.spi;versio
+ n="[0.1,1)"
+Service-Component: OSGI-INF/jvm-metrics-component.xml
+Tool: Bnd-1.50.0

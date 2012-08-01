@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<component name="com.github.migue.metrics.jvm.internal.extension.JVMMetricsProvider" immediate="true">
+  <implementation class="com.github.migue.metrics.jvm.internal.extension.JVMMetricsProvider" />
+  <property name="service.description" value="Sample Comparator Service" />
+  <property name="service.vendor" value="Apache Software Foundation" />
+  <service>
+    <provide interface="com.github.migue.metrics.spi.MetricsProvider" />
+  </service>
+</component>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="metrics" immediate="true">
+  
+  <scr:implementation class="com.github.migue.metrics.internal.manager.MetricsManager" />
+
+  <scr:reference
+    interface="com.github.migue.metrics.spi.MetricsProvider"
+    cardinality="0..n"
+    policy="dynamic"
+    bind="addMetricsProvider"
+    unbind="removeMetricsProvider"/>
+
+</scr:component>

@@ -4,7 +4,7 @@
 
 	<groupId>com.github.migue.osgi</groupId>
 	<artifactId>metrics-jvm</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.2</version>
 	<packaging>bundle</packaging>
 
 	<name>metrics-jvm</name>
@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>com.github.migue.osgi</groupId>
 			<artifactId>metrics-core</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.2</version>
 		</dependency>
 
 	</dependencies>
@@ -40,8 +40,7 @@
 						<Export-Package>com.github.migue.metrics.jvm.api.model.*</Export-Package>
 						<Import-Package>com.github.migue.metrics.api.*,
 							com.github.migue.metrics.spi.*, *</Import-Package>
-						<Private-Package>com.github.migue.metrics.jvm.internal.*</Private-Package>
-						<Bundle-Activator>com.github.migue.metrics.jvm.internal.activator.JVMMetricsExtension</Bundle-Activator>
+						<Private-Package>com.github.migue.metrics.jvm.internal.*</Private-Package>						
 						<Service-Component>OSGI-INF/jvm-metrics-component.xml</Service-Component>
 					</instructions>
 				</configuration>

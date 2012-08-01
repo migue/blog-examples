@@ -19,4 +19,9 @@ public class JVMMetricsProvider implements MetricsProvider {
 		return new HashMap<String, Object>();
 	}
 
+	@Override
+	public Long getId() {
+		return 1L;
+	}
+
 }

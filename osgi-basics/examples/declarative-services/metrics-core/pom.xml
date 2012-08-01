@@ -4,7 +4,7 @@
 
 	<groupId>com.github.migue.osgi</groupId>
 	<artifactId>metrics-core</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.2</version>
 	<packaging>bundle</packaging>
 
 	<name>metrics-core</name>
@@ -21,17 +21,17 @@
 			<version>4.0.3</version>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.felix</groupId> -->
-		<!-- <artifactId>org.apache.felix.gogo.shell</artifactId> -->
-		<!-- <version>0.10.0</version> -->
-		<!-- </dependency> -->
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.felix</groupId> -->
-		<!-- <artifactId>org.apache.felix.gogo.command</artifactId> -->
-		<!-- <version>0.12.0</version> -->
-		<!-- </dependency> -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>1.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -45,7 +45,6 @@
 						<Export-Package>com.github.migue.metrics.api.*,
 							com.github.migue.metrics.spi.*</Export-Package>
 						<Private-Package>com.github.migue.metrics.internal.*</Private-Package>
-						<Bundle-Activator>com.github.migue.metrics.internal.manager.MetricsManager</Bundle-Activator>
 						<Service-Component>OSGI-INF/metrics-component.xml</Service-Component>
 					</instructions>
 				</configuration>

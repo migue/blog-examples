@@ -1,16 +1,15 @@
 package com.github.migue.metrics.internal.manager;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
+import org.osgi.service.component.ComponentContext;
 
 import com.github.migue.metrics.api.model.Metric;
 import com.github.migue.metrics.spi.MetricsProvider;
@@ -24,8 +23,7 @@ import com.github.migue.metrics.spi.MetricsProvider;
  */
 public class MetricsManager {
 
-	@Override
-	void activate(Map properties) { {
+	void activate(ComponentContext componentContext) {
 		System.out.println("Starting the metrics manager. Waiting for metrics providers . . .");
 
 		_executorService.execute(new Runnable() {
@@ -52,31 +50,23 @@ public class MetricsManager {
 		});
 	}
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
+	public void addMetricsProvider(MetricsProvider metricsProvider) {
+		_extensions.put(metricsProvider.getId(), metricsProvider);
+	}
+
+	public void removeMetricsProvider(MetricsProvider metricsProvider) {
+		_extensions.remove(metricsProvider.getId());
+	}
+
+	public void deactivate(ComponentContext componentContext) throws Exception {
 		_executorService.shutdown();
 	}
 
 	protected List<Metric> collect() {
 		List<Metric> metrics = new ArrayList<Metric>();
 
-		// Approach one:implementing service listeners: depends on our needs
-
-		// Collection<ServiceReference<MetricsProvider>> serviceReferences =
-		// _bundleContext
-		// .getServiceReferences(MetricsProvider.class, null);
-
-		// using a service tracker
-
-		Object[] metricsProviders = _serviceTracker.getServices();
-
-		// Collect all the provided metrics: if defined
-		if (metricsProviders == null) {
-			return new ArrayList<Metric>();
-		}
-
-		for (int i = 0; i < metricsProviders.length; ++i) {
-			MetricsProvider metricsProvider = (MetricsProvider) metricsProviders[i];
+		for (Long extensionId : _extensions.keySet()) {
+			MetricsProvider metricsProvider = _extensions.get(extensionId);
 
 			metrics.add(metricsProvider.collect());
 		}
@@ -84,7 +74,7 @@ public class MetricsManager {
 		return metrics;
 	}
 
-	private Map<
+	private Map<Long, MetricsProvider> _extensions = new HashMap<Long, MetricsProvider>();
 
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 

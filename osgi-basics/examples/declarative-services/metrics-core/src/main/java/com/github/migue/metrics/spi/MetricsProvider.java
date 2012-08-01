@@ -13,4 +13,6 @@ public interface MetricsProvider {
 
 	public Map<String, Object> getMetricProperties();
 
+	public Long getId();
+
 }
