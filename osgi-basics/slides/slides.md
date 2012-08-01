@@ -1,14 +1,19 @@
 __Modularity in Java__
-
+=======================
 A quick __OSGI__ overview
 
-Miguel Ángel Pastor Olivar
+---
 
-`miguelinlas3@gmail.com`
+About me
+========
 
-[Twitter](http://twitter.com/miguelinlas3)
+- Miguel Ángel Pastor Olivar
+- Email: `miguelinlas3@gmail.com`
+- Twitter handler: [miguelinlas3](http://twitter.com/miguelinlas3)
+- [Personal blog](http://migue.github.com)
+- Concurrency, high scalability, programming languages
+- AspectJ, OSGI and Scala. Erlang aficionado.
 
-[Blog](http://migue.github.com)
 
 ---
 
@@ -30,14 +35,14 @@ Java's modularity?
 - Code visibility control is __low level__ 
 	- `private`, `protected`, `package`
 - Java `classpath` is error prone
-	- Good practices but hides tons of issues
+	- Prevent good modularity practices and hides tons of issues
 	- They were not designed for app developers
 - Lack of support for deployment and management
 
 ---
 
-Do we need to modularize??
-==========================
+Modularize?? Really??
+=====================
 
 - Jars hell
 - Have you ever worked with DLL??
@@ -93,8 +98,7 @@ OSGI module layer
 
 - OSGI module concept: `bundle`
 - Basic elements of a `bundle`
-	- Classes
-	- Resources
+	- Classes, Resources
 	- Metadata (`manifest.mf`)
 		- Human-readable information
 		- Bundle identification
@@ -192,8 +196,24 @@ Advanced concepts (II)
 
 - Components and frameworks
 	- Declarative services
-	- Blueprint
+	- Blueprint (former Spring DM)
 	- Apache Felix iPojo
 - Web applications
 	- OSGI Http service
 	- Real use case: Liferay
+
+---
+
+Resources
+=========
+
+- [OSGI specification]()
+- [OSGI in Action](http://www.manning.com/hall/)
+- [OSGI in Depth](http://manning.com/alves/)
+- [Java Application Architecture](http://www.amazon.com/Java-Application-Architecture-Modularity-Patterns/dp/0321247132)
+- [Apache Felix](http://felix.apache.org/site/index.html)
+
+---
+
+Q & A
+=====
