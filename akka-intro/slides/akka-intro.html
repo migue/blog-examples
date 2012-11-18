@@ -622,17 +622,27 @@ _metricsActor = _cloudServiceSystem.actorOf(
 		<p>Inmutable! Holder cannot write or failed the future</p>
 	</div>
 	<div class="slide">
+		<p>An ExecutionContext is required in order to run a future</p>
+	</div>
+	<div class="slide">
 		<h3>Creating a future</h3>
 		<pre class="scala">
-import scala.concurrent._
-import ExecutionContext.Implicits.global
-
-val session = socialNetwork.createSessionFor("user", credentials)
-
-val f: Future[List[Friend]] = future {
-  session.getFriends()
-}		
+import scala.concurrent.duration.Duration;
+import akka.japi.Function;
+import java.util.concurrent.Callable;
+import static akka.dispatch.Futures.future;
+import static java.util.concurrent.TimeUnit.SECONDS;
 		</pre>		
+		<pre class="scala">
+Future<String> f = future(new Callable<List>() {
+  public List call() {
+    return twitterClient.listTweets();
+  }
+  private final TwitterClient twitterClient = new TwitterClient();
+}, system.dispatcher());
+ 
+f.onSuccess(new PrintResult<String>(), system.dispatcher());
+		</pre>				
 	</div>
 </section>
 
