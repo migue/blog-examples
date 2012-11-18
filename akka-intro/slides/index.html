@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->  <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>The Typeclassopedia</title>
+
+	<meta name="description" content="The Typeclassopedia">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+    <!-- fonts -->
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic|PT+Sans+Narrow:400,700|Ubuntu+Mono:400,700' type='text/css'>
+
+	<!-- deck.js -->
+	<link rel="stylesheet" href="core/deck.core.css">
+	<link rel="stylesheet" href="extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="extensions/status/deck.status.css">
+	<link rel="stylesheet" href="extensions/hash/deck.hash.css">
+	<link rel="stylesheet" id="transition-theme-link" href="themes/transition/fade.css">
+	<link rel="stylesheet" id="style-theme-link" href="atlassian.css">
+	<script src="jquery-1.7.min.js"></script>
+	<script src="modernizr.custom.js"></script>
+	<script src="core/deck.core.js"></script>
+	<script src="extensions/hash/deck.hash.js"></script>
+	<script src="extensions/menu/deck.menu.js"></script>
+	<script src="extensions/goto/deck.goto.js"></script>
+	<script src="extensions/status/deck.status.js"></script>
+
+	<!-- highlight.js -->
+	<link rel="stylesheet" href="solarized_light.css">
+	<script src="highlight.pack.js"></script>
+
+	<script>
+	$(document).ready(function() {
+		$.deck('.slide');
+		$('pre').each(function(i, e) {
+			hljs.highlightBlock(e, '  ');
+		});
+		$('code').each(function(i, e) {
+			hljs.highlightBlock(e);
+		});
+	});
+	</script>
+
+</head>
+
+<body class="deck-container">
+
+<p class="deck-status">slide <span class="deck-status-current"></span> / <span class="deck-status-total"></span></p>
+
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<section class="slide" style="font-size: 100%">
+	<h1>
+    <div>The Typeclassopedia</div>
+  	<div style="font-size: 50%">John Kodumal, Atlassian</div>
+  	<div style="font-size: 50%">jkodumal@atlassian</div>
+	<div style="font-size: 50%"><br/></div>
+	<div style="font-size: 25%">Japanese translation by Shingo Omura is <a href="index-ja.html">here<a>.</div>
+  </h1>
+</section>
+
+
+<section class="slide">
+	<h2>Typeclasses: Open-world interfaces</h2>
+	<div class="slide">
+		<p>Typeclasses are akin to Java interfaces, but more flexible.</p>
+	</div>
+	<div class="slide">
+		<p>We declare them in scala with traits:</p>
+<pre class="scala">
+trait Show[A] {
+	def shows(a: A): String
+}
+</pre>	
+		<p>Note the subtle difference compared to the mix-in "interface" style:
+<pre class="scala">
+trait Show {
+	def shows(): String
+}	
+</pre>
+	</div>		
+	<div class="slide">
+		<p>We also need a way to add a type to the class:</p>
+<pre class="scala">
+implicit val IntShow = new Show[Int] {
+	def shows(a: Int) = a.toString
+}
+</pre>
+</section>
+
+<section class="slide">
+	<h2>Using a typeclass</h2>
+	<div class="slide">
+		<p>We use scala implicits:</p>
+<pre>
+def shows[A](a : A)(implicit shower: Show[A]) = shower.shows(a)
+</pre>
+	</div>
+	<div class="slide">
+		<p>Or alternatively, using <em>context bounds</em>:</p>
+<pre class="scala">
+def shows[A : Show](a : A) = implicitly[Show[A]].shows(a)
+</pre>
+		<p>(implicitly is part of predef: <code>def implicitly[A](implicit a : A) = a</code>)</p>
+	</div>
+	<div class="slide">
+		<p>Scalaz pimps a set of common typeclasses for us, so we can just do:</p>
+<pre class="scala">
+3.shows // must have a "Show[Int]" instance in scope, or will fail to type check
+</pre>
+	</div>	
+</section>
+
+<section class="slide">
+	<h2>The Open-World Assumption</h2>
+	<p>What have we gained?</p>
+	<ul>
+		<div class="slide">
+			<li>We can declare instances <em>outside</em> of the types themselves</li>
+			<ul>
+				<li> <code>Int</code> knows nothing about <code>Show</code>
+			</ul>
+		</div>
+		<li class="slide">This is the <em>open world assumption</em></li>
+		<div class="slide">
+			<li>In Scala, we can <em>override</em> the typeclass instance by putting a new one in scope:
+<pre class="scala">
+def unaryShows(x : Int) : String = { 
+	implicit val AltIntShow = new Show[Int] {
+		def shows(i : Int) = (1 to i) map(_ => "|") mkString
+	}
+	shows(x)
+}
+println shows(5)      // prints '5'
+println unaryShows(5) // prints '|||||'	
+</pre>
+		</div>
+	</ul>
+</section>
+
+<section class="slide">
+	<h2>Typeclasses <code>/==</code> Subtype polymorphism</h2>
+	<p>What we <em>can't</em> do with Scala's typeclasses (<a href="https://gist.github.com/2026129">not easily at least</a>):
+<pre class="java">
+interface Show {
+	String show();
+}
+
+class Foo extends Show {
+	public String show() {
+		return "a foo";
+	}
+}
+
+class Bar extends Show {
+	public String show() {
+		return "a bar";
+	}
+}
+
+List[Show] showList = new ArrayList(new Foo(), new Bar(), new Foo());
+
+for (String s : showList) {
+	System.out.println(s.show);
+}
+</pre> 
+</section>
+
+<section class="slide">
+	<h2>The Typeclassopedia</h2>
+	<img src="images/typeclassopedia.png" style="float: right; width: 100%; margin-left: 20px;">
+	<p>A set of interrelated typeclasses that have proven handy for structuring functional code:
+	<ul>
+		<li class="slide"><em>Functional design patterns</em></li>
+		<li class="slide">There's mostly* nothing magical about these typeclasses</li>
+		<li class="slide">In scala, they're provided by a library called scalaz (pronounced scala-zed)</li>
+		<li class="slide">These examples are based on <a href="https://github.com/scalaz/scalaz/tree/scalaz-seven">scalaz-seven</a></li>
+		<li class="slide">This is how the hierarchy is defined in Haskell--- it isn't perfect</li>
+	</ul>
+	<p class="slide">We'll cover functors, applicative functors, and monads</p>
+	<p class="slide" style="font-size: 60%">*one exception: <code>for</code> comprehensions and monads</p>
+</section>
+
+<section class="slide">
+	<h2>Introducing Functor</h2>
+	<div class="slide">
+	<p>A functor is simply something you can map over. It defines a single method:</p>
+<pre class="scala">
+trait Functor[F[_]] {
+	def map[A,B](fa: F[A])(f: A => B) : F[B]
+}
+</pre>
+	</div>
+	<div class="slide">
+		<p>An instance for <code>Option</code>:</p>
+<pre class="scala">
+implicit val OptionFunctor = new Functor[Option] {
+	def map[A, B](fa: Option[A])(f: A => B) : Option[B] = 
+		fa match {
+			case Some(a) => Some(f(a))
+			case None => None
+		}
+}
+</pre>
+	</div>
+	<div class="slide">
+		<p>In Haskell, the arguments are reversed:</p>
+<pre class="haskell">
+class Functor f where  
+    fmap :: (a -> b) -> f a -> f b	
+</pre>
+	</div>
+	<div class="slide">
+		<p>In the Haskell version, we see how <code>f</code> is <em>lifted</em> into the functor context.</p>
+	</div>
+</section>
+
+<section class="slide">
+	<h2>Fun with Functions as Functors</h2>
+	<p>"Thing you can map over" leads to obvious examples:</p>
+	<ul>
+		<li class="slide">Lists</li>
+		<li class="slide">Trees</li>
+		<li class="slide">Maps</li>
+	</ul>
+	<div class="slide">
+		<p>Let's look at something less obvious: Functions!</p>
+<pre>
+implicit def FunctionFunctor[R] = new Functor[({type l[a] = R=>a})#l] {
+	def map[A, B](fa: R => A)(f: A => B) : R => B = (x => f(fa(x)))
+}
+</pre>
+	</div>
+	<h6 class="slide">Pop quiz: I defined map in a slightly funky way. What simple concept is this expressing?</h6>
+	<div class="slide">
+		<p>Again, the Haskell version makes this much clearer. Start with <code>fmap</code>:</p>
+<pre class="haskell">
+    fmap :: (a -> b) -> f a -> f b	
+</pre>
+	</div>
+	<div class="slide">
+		<p>Substitute <code>r -> a</code> for <code>f a</code></p>
+<pre class="haskell">
+    fmap :: (a -> b) -> (r -> a) -> (r -> b)	
+</pre>
+	</div>
+	<p class="slide">Aside: This is where the "box" analogy starts falling apart, and we start throwing around vague terms like "computational context"...</p>
+</section>
+
+<section class="slide">
+	<h2>Functor Laws</h2>
+	<p>There are some additional constraints on Functors that make them "behave appropriately":</p>
+	<ul>
+		<div class="slide">
+			<li><code>map(fa)(id) === fa</code></li> (Mapping over the identity function produces the original functor)
+		</div>
+		<div class="slide">	
+			<li><code>map(fa)(f compose g) === map(map(fa)(g))(f)</code></li> (Mapping over a composed function is the same as mapping over each function)
+		</div>
+	</ul>
+	<p class="slide">These laws prevent ridiculous definitions of <code>map</code>, and make it possible to predict how functions behave.</p>
+	<p class="slide">Note that these laws are <strong>not</strong> enforced by the type system.
+</section>
+
+<section class="slide">
+	<h2>Aside: Parametricity</h2>
+	<blockquote class="slide">
+		<p>With great weakness comes great power...</p>
+		<cite>Ben "Pierce" Parker</cite>
+	</blockquote>
+	<blockquote class="slide">
+		<p>Mo' power, mo' problems...</p>
+		<cite>Biggie Smalls</cite>
+	</blockquote>
+	<div class="slide">
+<pre class="scala">
+def fun[A](a : A) : A = ...
+</pre>
+	<p>What is <code>fun</code>?</p>
+	</div>
+	<div class="slide">
+<pre class="scala">
+val x : List[Int] = ...
+def foo[F[_] : Functor](fs : F[Int]) = ...
+</pre>
+	<p>What is <code>foo(x).length?</code><p>
+	</div>
+</section>
+
+<section class="slide">
+	<h2>Introducing Applicative Functor</h2>
+	<p>You can get pretty far on <code>map</code> alone... but sometimes you need more.</p>
+	<div class="slide">
+		<p>Consider the following:</p>
+<pre class="scala">
+def parse(s : String) : Option[Int] = ...
+</pre>
+	</div>
+	<div class="slide">
+		<p>Let's try to add two parsed integers with <code>map</code>:</p>
+<pre class="scala">
+parse("3").map((x: Int) => (y: Int) =>  x + y) // ???
+</pre>
+	</div>
+	<div class="slide">
+		<p>We're left with an <code>Option[Int => Int]</code>... but what can we do with that?
+	</div>
+	<h5 class="slide">We'll need a more powerful <code>map</code>-like operation</h5>
+</section>
+
+<section class="slide">
+	<h2>Applicative Functors</h2>
+	<div class="slide">
+		<p>Let's add the power we need to <code>Functor</code>:
+<pre class="scala">
+trait Applicative[F[_]] extends Functor {
+	def <*>[A, B](fa: F[A])(f : F[A => B]) : F[B]
+	// ... there's more to Applicative, to be shown shortly
+}
+</pre>
+	</div>
+	<div class="slide">
+		<p>Which makes our previous example look something like:</p>
+<pre class="scala">
+(parse("3")).<*>(parse("Nope").map(x => (y : Int) => x + y))
+</pre>
+		<p style="font-size: 60%">(Yuck)</p>
+	</div>
+</section>
+
+<section class="slide">
+	<h2>Applicative Syntax</h2>
+	<div>
+		<p>In Haskell, things look a little more obvious: </p>
+<pre class="haskell">
+(+) <$> parse("3") <*> parse("Nope") 
+</pre>	
+	</div>
+	<div class="slide">
+		<p>Generalizing a bit, we go from calling a pure function: </p>
+<pre class="haskell">
+f x y z
+</pre>
+	</div>
+	<div class="slide">
+		<p>To calling a function on "effectful" arguments: </p>
+<pre class="haskell">
+f <$> x <*> y <*> z
+</pre>
+	</div>
+	<div class="slide">
+		<p>Scalaz's <code>ApplicativeBuilder</code> improves the situation somewhat:</p>
+<pre class="scala">
+(parse("3") |@| parse("Nope"))(_ + _)
+</pre>
+	</div>	
+</section>
+
+<section class="slide">
+	<p style="font-size: 2500%">|@|</p>
+</section>
+
+<section class="slide">
+	<img src="images/macaulay.jpg" style="float: right; width: 100%;">
+	<h3>(The Macaulay Culkin Operator)</h3>
+</section>
+
+<section class="slide">
+	<h2>More on Applicatives</h2>
+	<div class="slide">
+		<p>What if some of the arguments aren't <code>Option</code>?
+<pre class="scala">
+	(parse("3") |@| 4 /* uh oh, no macaulay for my culkin */) (_ + _)
+</pre>
+	</div>	
+	<div class="slide">
+		<p>One small addition to our type class:</p>
+<pre class="scala">
+trait Applicative[F[_]] extends Functor {
+	def <*>[A, B](fa: F[A])(f : F[A => B]) : F[B]
+	<strong>def point[A](a : A): F[A]</strong>
+}
+</pre>
+	<h6 class="slide">Exercise: Define the applicative instance for <code>Option</code></h6>
+	</div>
+</section>
+
+<!--
+<section class="slide">
+	<p style="font-size: 2250%"><|*|></p>
+</section>
+
+<section class="slide">
+	<img src="images/mr-incredible.jpg" style="float: right; width: 100%;">
+	<h3>(Asterisks Man, Arms Akimbo)</h3>
+</section>
+-->
+
+<section class="slide">
+	<h2>A Tutorial on Monads</h2>
+	<div class="slide">
+		<img src="images/ackbar.jpeg" style="width=100%">
+	</div>
+	<div class="slide">
+		<a href="http://byorgey.wordpress.com/2009/01/12/abstraction-intuition-and-the-monad-tutorial-fallacy/"><h4>Yes, it's a trap</h4></a>
+	</div>
+</section>
+
+<section class="slide">
+	<h2>Introducing Monads</h2>
+	<p>As before, we'll introduce a new task and see what goes wrong...</p>
+	<div class="slide">
+		<p>Take our <code>parse</code> example again:</p>
+<pre class="scala">
+def parse(s : String) : Option[Int] = ...
+</pre>
+	</div>
+	<div class="slide">
+		<p>What if our input <code>String</code> was an optional query parameter?
+<pre class="scala">
+val x : Option[String] = params.get("x")
+</pre>
+		<p>We've got an <code>Option[String]</code> and a function <code>String => Option[Int]</code></p>
+	</div>
+	<div class="slide">
+		<p>When all you have is a <code>map</code> hammer...</p>
+<pre class="scala">
+x.map(parse) // Option[Option[Int]] ??
+</pre>
+	</div>	
+</section>
+
+<section class="slide">
+	<h2>Monads</h2>
+	<div class="slide">
+		<p>Let's add the power we need to <code>Applicative</code>:
+<pre class="scala">
+trait Monad[F[_]] extends Applicative {
+	def >>=[A, B](fa: F[A])(f : A => F[B]) : F[B]
+}
+</pre>
+	<p>This is pronounced <code>bind</code></p>
+	</div>
+	<div class="slide">
+		<p>It makes our previous example look something like:</p>
+<pre class="scala">
+params.get("x") >>= parse // Option[Int]
+</pre>
+	</div>
+	<div class="slide">
+		<p>A more complete web-based calculator example:</p>
+<pre class="scala">
+params.get("x") >>= parse >>= (x => (params.get("y") >>= parse) map (_ + x) )
+</pre>
+<p style="font-size: 60%">(Yuck)</p>
+	</div>
+</section>
+
+<section class="slide">
+	<h2>Syntactic Sugar to the Rescue</h2>
+	<div class="slide">
+		<p>The last example hints at a fairly typical pattern: </p>
+<pre class="scala">
+monadicX >>= (x => monadicY >>= (y => monadicZ map (z => x+y+z))) 
+</pre>
+		<p>We have nested <code>bind</code>'s with a final <code>map</code></p>
+	</div>
+	<div class="slide">
+		<p>Reformatting it a bit: </p>
+<pre class="scala">
+monadicX >>= (x => 
+monadicY >>= (y => 
+monadicZ map (z => 
+   x+y+z
+))) 
+</pre>
+	</div>
+	<div class="slide">
+		<p>With Scala <code>for</code> comprehensions, this becomes:
+<pre class="scala">
+for {
+	x <- monadicX
+	y <- monadicY
+	z <- monadicZ
+} yield x + y + z
+</pre>
+	<p style="font-size:60%">(Much nicer!)</p>
+	</div>
+
+</section>
+
+<section class="slide">
+	<h2>Monad as Embedded Language</h2>
+	<div class="slide">
+		<p>I'll present one <a href="http://en.wikibooks.org/wiki/Haskell/Understanding_monads">stab</a> at providing an intuition for monads. Consider:</p>
+<pre class="scala">
+for {
+	x <- monadicX
+	y <- monadicY
+} yield x + y
+</pre>
+		<p>Q: What does this code do?</p>
+	</div>
+	<div class="slide">
+		<p>A: Depends on the monad.</p>
+	</div>
+	<div class="slide">
+		<p>A monadic <code>for</code> comprehension is an embedded programming language with semantics defined by the monad:</p>
+	</div>
+	<div class="slide">
+		<table style="width: 100%">
+			<tr>
+				<th align="left">Monad</th>
+				<th align="left">Semantics</th>
+			</tr>
+			<tr class="slide">
+				<td><code>Option</code></td>
+				<td>Anonymous exceptions</td>
+			</tr>
+			<tr class="slide">
+				<td><code>Reader</code></td>
+				<td>Global environment</td>
+			</tr>
+			<tr class="slide">
+				<td><code>Validation</code></td>
+				<td>Descriptive exceptions</td>
+			</tr>
+			<tr class="slide">
+				<td><code>List</code></td>
+				<td>Nondeterministic computation</td>
+			</tr>
+		</table>
+	</div>
+</section>
+
+</body>
+</html>
