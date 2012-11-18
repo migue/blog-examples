@@ -66,7 +66,7 @@
    </h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>A little bit about me</h2>
 	<ul>
 		<div class="slide">
@@ -94,7 +94,7 @@
 	<h1>What will we talking about?</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Agenda</h2>
 	<ul>
 		<div class="slide">
@@ -125,8 +125,8 @@
 	</ul>
 </section>
 
-<section class="slide" style="margin-left:11%">
-	<h2>More's law</h2>
+<section class="slide" style="margin-left:14%">
+	<h2>Moore's law</h2>
 	<div class="slide">
 		<p>Chips in transistor are doubled every 18 months</p>
 	</div>
@@ -155,7 +155,7 @@
 	<h1>What are the modern applications demanding?</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Scalability</h2>
 	<div class="slide">
 		<p>Scale out: By adding new machines/nodes</p>
@@ -190,7 +190,7 @@
 	<h1>Writing concurrent apps?</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Traditional approach</h2>
 	<div class="slide">
 		<ul>
@@ -231,33 +231,33 @@
 	<h1>What is Akka?</h1>	
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Akka definition</h2>
 	<blockquote cite="http://channel9.msdn.com/Shows/Going+Deep/Hewitt-Meijer-and-Szyperski-The-Actor-Model-everything-you-wanted-to-know-but-were-afraid-to-ask">
 		Akka is a toolkit and runtime for building  highly concurrent, distributed and fault tolerant event-driven applications on the JVM  		
   		<p><cite><a href="">Akka docs</a></cite></p>
 	</blockquote>
 	<ul>
-			<div class="slide">
-				<li>Actor model</li>
-			</div>
-			<div class="slide">
-				<li>Futures</li>
-			</div>
-			<div class="slide">
-				<li>Software Transactional memory</li>
-			</div>
-			<div class="slide">
-				<li>. . .</li>
-			</div>			
-		</ul>
+		<div class="slide">
+			<li>Actor model</li>
+		</div>
+		<div class="slide">
+			<li>Futures</li>
+		</div>
+		<div class="slide">
+			<li>Software Transactional memory</li>
+		</div>
+		<div class="slide">
+			<li>. . .</li>
+		</div>			
+	</ul>
 </section>
 
 <section class="slide">
 	<h1>So, what is the Actor model?</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Actor's definition</h2>
 	<blockquote cite="http://channel9.msdn.com/Shows/Going+Deep/Hewitt-Meijer-and-Szyperski-The-Actor-Model-everything-you-wanted-to-know-but-were-afraid-to-ask">  		
 		<p>Fundamental unit of computation that embodies:</p>
@@ -276,62 +276,312 @@
 
   		<p><cite><a href="http://channel9.msdn.com/Shows/Going+Deep/Hewitt-Meijer-and-Szyperski-The-Actor-Model-everything-you-wanted-to-know-but-were-afraid-to-ask">Carl Hewitt</a></cite></p>
 	</blockquote>
+	<div class="slide">
+		<h2>Actors do not solve all the problems!!</h2>
+	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Actor structure</h2>
-	<img src="images/actors.svg" />
+	<div class="slide">
+		<img src="images/actors-structure.001.png" style="margin-left:-20%"/>
+	</div>
+	<div class="slide">
+		<img src="images/actors-multiple.002.png" style="margin-left: 30%;margin-top:-42%"/>
+	</div>
+	<div class="slide">
+		<div class="slide">
+			<li>No synchronization is required</li>
+		</div>
+		<div class="slide">
+			<li>Extremely lightweight (300 bytes each aprox)</li>
+		</div>
+		<div class="slide">
+			<li>Asynchronous</li>
+		</div>
+		<div class="slide">
+			<li>Run on top of JVM thread pools</li>
+		</div>			
+	</ul>
+	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Actor operations</h2>
 	<div class="slide">
 		<h2>Define an actor</h2>
-		<pre class="scala">
-case class Message(who: String, time:Long)
+		<pre class="java">
+public class MetricsProcessorActor extends UntypedActor {
 
-class MetricsHandlerActor extends Actor with ActorLogging {
-	def receive = {
-		case Message(who, time) => log.info("Received message {} with time {}", who, time)
+	public void onReceive(Object message) {
+        if (message instanceof JVMMetric) {
+        	JVMMetric jvmMetric = (JVMMetric)message;
+
+        	_dataStore.save(jvmMetric);
+        }
 	}
+    private DataStore _dataStore = new LogDataStore();
 }
 		</pre>	
 	</div>
 	<div class="slide">
 		<h2>Create an actor</h2>
-		<pre class="scala">
-ActorSystem system = ActorSystem.create("SystemName");
+		<pre class="java">
+ActorSystem _agentSystem = ActorSystem.create("AgentSystem");
 
-ActorRef messageHandler = system.actorOf(new Props(MetricsHandlerActor.class), "messageHandler");
+ActorRef metricsActor = _agentSystem.actorOf(new Props(new UntypedActorFactory() {
+				@Override
+				public Actor create() { return new MetricsActor(metricsActor);} 
+			}), "metricsActor");
 		</pre>	
 	</div>
+<div class="slide">
+		<h2>Getting a reference to an existing actor</h2>
+		<pre class="java">
+ActorSystem _agentSystem = ActorSystem.create("AgentSystem");
 
+ActorRef handshakeActor = _agentSystem.actorFor("akka://MonitoringServiceSystem@localhost:5557/user/handshakeActor");
+</pre>	
+	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Actor operations</h2>
 	<div class="slide">
 		<h2>Sending messages</h2>
-		<pre class="scala">
-	messageHandler.tell(new Message("JVM-MemoryUsage", new Date().getTime()));
+		<pre class="java">
+	metricsActor.tell(new JVMMessage("JVM-MemoryUsage", new Date().getTime()));
 		</pre>	
 	</div>
 	<div class="slide">
 		<h2>Reply to a message</h2>
-		<pre class="scala">
-class MetricsHandlerActor extends Actor with ActorLogging {
-	def receive = {
-		case Message(who, time) => { 
-				log.info("Received message {} with time {}", who, time)
-				sender tell ("Received message " + who)
-			}
+		<pre class="java">
+public class HandshakeActor extends UntypedActor {
+
+	public void onReceive(Object message) { 	
+
+		if (message instanceof AuthMessage) {
+            AuthMessage authMessage = (AuthMessage)message;
+
+            if (authMessage.getUser() == "migue" && authMessage.getCredentials() == "migue")
+            	getSender().tell("ok");	
+            else
+            	getSender().tell("fail");
+         } else
+            throw new IllegalStateException("Unable to handle " + message);
 	}
-}		</pre>	
+
+}</pre>	
 	</div>
 </section>
 
+<section class="slide" style="margin-left:14%">
+	<h2>Become/Unbecome</h2>
+	<div class="slide">
+		<p>Hotswapping the Actor’s implementation at runtime</p>
+		<p>Code is kept in a Stack</p>
+	</div>
+	<div class="slide">
+		<h3>Code example</h3>
+		<pre class="java">
+public class MetricsProcessorActor extends UntypedActor { 
+	public void onReceive(Object message) {
+        if (message instanceof SwappingMessage) {
+        	getContext().become(altPersistence, false)
+        }
+	}
+	
+	Procedure&lt;Object&gt; altPersistence = new Procedure&lt;Object&gt;() {
+    	@Override
+    	public void apply(Object message) {
+      		altDatastore.save(message);
+    	}
 
-<section class="slide" style="margin-left:11%">
+   		DataStore altDatastore = new AltDataStore();
+  	};
+
+    private DataStore _dataStore = new LogDataStore();
+}
+		</pre>	
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>Routing</h2>
+	<div class="slide">
+		<pre class="java">
+final ActorSystem monitoringServiceSystem = ActorSystem.create("MonitoringServiceSystem");
+
+ActorRef metricsActor = monitoringServiceSystem.actorOf(
+            new Props(MetricsProcessorActor.class).withRouter(
+                  new RoundRobinRouter(100), "metricsActor");
+	}
+		</pre>	
+	</div>
+	<div class="slide">
+		<h2>Dealing with routers does not change our code</h2>
+		<pre class="java">
+	metricsActor.tell(new JVMMessage("JVM-MemoryUsage", new Date().getTime()));
+		</pre>	
+	</div>
+
+	<div class="slide">
+		<h2>Configuring a router</h2>
+		<pre class="scala">
+akka {
+	actor {
+		deployment {
+			/metricsActor {
+				router = round-robin
+				nr-of-instances = 100
+			} 
+		}
+	}
+}		</pre>	
+	</div>
+	<div class="slide">
+		<p>Configuration overrides the values written in source code</p>
+	<div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<div class="slide">
+		<h2>Different kinds of routes available</h2>
+		<p>BroadcastRouter</p>
+		<p>RandomRouter</p>
+		<p>RoundRobinRouter</p>
+		<p>ScatterGatherFirstCompletedRouter</p>		
+		<p>SmallestMailboxRouter</p>
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>Remoting</h2>
+	<div class="slide">		
+		<p>Actors are distributable by design</p>
+	</div>
+	<div class="slide">		
+		<p>NO changes in source are required. Only deployment config!!</p>
+	</div>
+	<div class="slide">		
+		<h2>Remoting configuration</h2>
+		<pre class="scala">
+akka {
+	actor {
+		deployment {
+			/metricsActor {
+				remote = "akka://monitoringSystem@server-name:5557"
+			} 
+		}
+	}
+}		</pre>			
+	</div>
+	<div class="slide">
+		<h3>NO changes in our existing code!!</h3>
+		<pre class="java">
+final ActorSystem monitoringServiceSystem = ActorSystem.create("MonitoringServiceSystem");
+
+ActorRef metricsActor = monitoringServiceSystem.actorOf(
+            new Props(MetricsProcessorActor.class), "metricsActor");
+	}
+		</pre>	
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>Supervision</h2>
+	<div class="slide">		
+		<p>Actors are distributable by design</p>
+	</div>
+	<div class="slide">		
+		<p>NO changes in source are required. Only deployment config!!</p>
+	</div>
+	<div class="slide">		
+		<h2>Remoting configuration</h2>
+		<pre class="scala">
+akka {
+	actor {
+		deployment {
+			/metricsActor {
+				provider = akka.remote.RemoteActorRefProvider
+				remote = "akka://monitoringSystem@server-name:5557"
+			} 
+		}
+	}
+}		</pre>			
+	</div>
+	<div class="slide">
+		<h3>NO changes in our existing code!!</h3>
+		<pre class="java">
+final ActorSystem monitoringServiceSystem = ActorSystem.create("MonitoringServiceSystem");
+
+ActorRef metricsActor = monitoringServiceSystem.actorOf(
+            new Props(MetricsProcessorActor.class), "metricsActor");
+	}
+		</pre>	
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>Actor topology and supervision</h2>
+	<div class="slide">
+		<p>Name resolution similar to the filesystem</p>
+	</div>
+	<div class="slide">
+		<img src="images/topologies.003.png" style="margin-left:-5%"/>
+	</div>
+	<div class="slide">
+		<p>Let it crash!</p>		
+	</div>
+	<div class="slide">
+		<p>Errors flow in the system; nor in the stack!</p>		
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>One for one strategy</h2>
+	<div class="slide">
+		<img src="images/oneforone.004.png" style="margin-left:-5%"/>
+	</div>
+	<div class="slide">
+		<p>Used by default</p>
+	</div>
+	<div class="slide">
+		<p>This should be the first option</p>		
+	</div>
+	<div class="slide">
+		<p>Restart child actors independently!</p>		
+	</div>
+</section>
+<section class="slide" style="margin-left:14%">
+	<h2>One for all strategy</h2>
+	<div class="slide">
+		<img src="images/oneforall.005.png" style="margin-left:-5%"/>
+	</div>
+	<div class="slide">
+		<p>All the children are tightly coupled</p>		
+	</div>
+	<div class="slide">
+		<p>Restart child actors all together!</p>		
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
+	<h2>Configuring supervision</h2>
+	<div class="slide">
+		<pre class="java">
+final SupervisorStrategy supervisorStrategy =
+        new OneForOneStrategy(3, Duration.create(1, TimeUnit.MINUTES), new Class&lt;?&gt;[] {Exception.class});
+
+_metricsActor = _cloudServiceSystem.actorOf(
+        new Props(MetricsProcessorActor.class).withRouter(
+                new RoundRobinRouter(100).withSupervisorStrategy(
+                        supervisorStrategy)), "metricsActor");
+	</pre>
+	</div>
+</section>
+
+<section class="slide" style="margin-left:14%">
 	<h2>Actor usages</h2>
 	<div class="slide">
 		<p>A thread</p>
@@ -356,63 +606,11 @@ class MetricsHandlerActor extends Actor with ActorLogging {
 	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
-	<h2>Actor operations</h2>
-	<div class="slide">
-		<h3>Become/Unbecome</h3>
-		<pre class="scala">
-class HotSwapActor extends Actor {
-  import context._
-  def angry: Receive = {
-    case "foo" ⇒ sender ! "I am already angry?"
-    case "bar" ⇒ become(happy)
-  }
- 
-  def happy: Receive = {
-    case "bar" ⇒ sender ! "I am already happy :-)"
-    case "foo" ⇒ become(angry)
-  }
- 
-  def receive = {
-    case "foo" ⇒ become(angry)
-    case "bar" ⇒ become(happy)
-  }
-}	
-		</pre>	
-	</div>
-</section>
-
-<section class="slide" style="margin-left:11%">
-	<h2>Remote depoloyment</h2>
-	<pre class="scala">
-akka {
-	actor {
-		provider = akka.remote.RemoteActorRefProvider
-			deployment {
-				/MessageHandler {
-					remote = akka://SystemName@machine:2552
-				}
-			}
-	}
-}
-	</pre>
-
-</section>
-
-<section class="slide" style="margin-left:11%">
-	<h2>More features . . . (not covered here in detail)</h2>
-	<p>Router</p>
-	<p>Router + Resizer	</p>
-	<p>Failure management</p>
-	<p>Supervision</p>
-	<p></p>
-</section>
-
 <section class="slide">
 	<h1>The future you promised me</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Futures</h2>
 	<div class="slide">
 		<p>Reason about performing many operations in parallel. In an efficient and non-blocking way</p>		
@@ -438,7 +636,7 @@ val f: Future[List[Friend]] = future {
 	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Callbacks</h2>
 	<div class="slide">
 		<p>Interested in the result of the computation; not only side effects</p>		
@@ -472,7 +670,7 @@ f onFailure {
 		</pre>		
 	</div>
 </section>
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Futures composition</h2>
 	<div class="slide">
 		<h3>Using callbacks</h3>
@@ -515,7 +713,7 @@ purchase onSuccess {
 	<h1>Software Transactional Memory</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>Shared mutability</h2>
 	<div class="slide">
 		<p>Sometimes we will deal with shared state</p>
@@ -545,78 +743,36 @@ purchase onSuccess {
 	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
-	<h2>Building a double linked list</h2>
-	<div class="slide">
-		<h3>Use Ref for shared variables</h3>
-		<pre class="scala">
-import scala.concurrent.stm._
-
-class ConcurrentIntList {
-  private class Node(val elem: Int, prev0: Node, next0: Node) {
-    val isHeader = prev0 == null
-    // Ref represents a single mutable cell
-    val prev = Ref(if (isHeader) this else prev0)
-    val next = Ref(if (isHeader) this else next0)
-  }
-  private val header = new Node(-1, null, null)
-		</pre>
-	</div>
-	<div class="slide">
-		<h3>Wrap your code in atomic</h3>
-		<pre class="scala">
-def addLast(elem: Int) {
-    atomic { implicit txn =>
-      val p = header.prev()
-      val newNode = new Node(elem, p, header)
-      p.next() = newNode
-      header.prev() = newNode
-    }
-  }
-		</pre>
-	</div>
-</section>
-
 <section class="slide">
 	<h1>Anything else?</h1>
 </section>
 
-<section class="slide" style="margin-left:11%">
-	<h2>More approaches (random order)</h2>
+<section class="slide" style="margin-left:14%">
+	<h2>Akka presents more tools in the toolkit</h2>
 	<div class="slide">
-		<p><a href="http://lmax-exchange.github.com/disruptor/">The Disruptor</a></p>
+		<p>Transactors: Actors + STM</p>
 	</div>
 	<div class="slide">
-		<p><a href="http://vertx.io/">Vertex</a>: NodeJS on top of the JVM</p>
-		<pre class="java">
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.deploy.Verticle;
-
-public class Server extends Verticle {
-    public void start() {
-        vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
-            public void handle(HttpServerRequest req) {
-                String file = req.path.equals("/") ? "index.html" : req.path;
-                req.response.sendFile("webroot/" + file);
-            }
-        }).listen(8080);
-    }
-}			
-		</pre>
+		<p>Agents: inspired in the Clojure ones</p>
 	</div>
 	<div class="slide">
-		<p><a href="http://clojure.org/">Clojure language</a></p>
+		<p>Akka + AMQP</p>
 	</div>
 	<div class="slide">
-		<p><a href="http://gpars.codehaus.org/">Gpars</a> Concurrency programming in Groovy</p>
+		<p>Akka + Camel</p>
 	</div>
 	<div class="slide">
-		<p><a href="http://docs.scala-lang.org/overviews/parallel-collections/overview.html">Scala parallel collections</a></p>
+		<p>Dataflow concurrency</p>
+	</div>
+	<div class="slide">
+		<p>IO</p>
+	</div>
+	<div class="slide">
+		<p>Clustering support (experimental mode at this moment)</p>
 	</div>
 </section>
 
-<section class="slide" style="margin-left:11%">
+<section class="slide" style="margin-left:14%">
 	<h2>References</h2>
 
 	<div class="slide">
